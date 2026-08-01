@@ -17,6 +17,8 @@ export default defineConfig({
       '@input': r('./src/input'),
       '@ui': r('./src/ui'),
       '@util': r('./src/util'),
+      '@scenes': r('./src/scenes'),
+      '@game': r('./src/game'),
     },
   },
   build: {

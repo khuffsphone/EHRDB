@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <title>TEN COUNT — Championship Boxing</title>
+    <meta name="description" content="An original browser boxing game with a deterministic simulation core." />
+    <style>
+      html, body {
+        margin: 0; padding: 0; height: 100%; background: #05070b; color: #e8ecf2;
+        font-family: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace;
+        overflow: hidden;
+      }
+      #game { width: 100vw; height: 100vh; display: grid; place-items: center; }
+      #game canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+      #boot { position: absolute; inset: 0; display: grid; place-items: center; font-size: 14px; letter-spacing: .2em; }
+    </style>
+  </head>
+  <body>
+    <div id="game"><div id="boot">LOADING…</div></div>
+    <script type="module">
+      import './src/main.ts';
+      const b = document.getElementById('boot');
+      if (b) setTimeout(() => b.remove(), 400);
+    </script>
+  </body>
+</html>

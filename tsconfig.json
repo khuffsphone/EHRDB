@@ -31,7 +31,9 @@
       "@audio/*": ["src/audio/*"],
       "@input/*": ["src/input/*"],
       "@ui/*": ["src/ui/*"],
-      "@util/*": ["src/util/*"]
+      "@util/*": ["src/util/*"],
+      "@scenes/*": ["src/scenes/*"],
+      "@game/*": ["src/game/*"]
     }
   },
   "include": ["src", "tests", "tools", "vite.config.ts", "vitest.config.ts", "eslint.config.js"]
