@@ -1,0 +1,5 @@
+$ npx tsx tools/release-audit.ts
+
+  · bundle scanned: 3 files, 0 binary media
+  · no ROM data, no reference-work terms, no private paths, no unfinished markers on a release path
+release audit passed

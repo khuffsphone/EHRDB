@@ -45,10 +45,18 @@ import {
 const HIT_LIGHT_TICKS = 9;
 const HIT_HEAVY_TICKS = 17;
 const STAGGER_TICKS = 30;
-/** Ticks a punch may sit in the buffer before it is discarded as stale. */
-const BUFFER_MAX_AGE = 12;
-/** Remaining commitment at or below which a new punch may be buffered. */
+/**
+ * Remaining commitment at or below which a new punch may be buffered.
+ * This is the window a player learns: ask for the follow-up near the end of
+ * the current punch and it comes out.
+ */
 const BUFFER_WINDOW = 14;
+/**
+ * Ticks a punch may sit in the buffer before it is discarded as stale. It must
+ * exceed BUFFER_WINDOW, or a punch buffered at the very edge of the window
+ * would expire before the fighter was free to throw it.
+ */
+const BUFFER_MAX_AGE = BUFFER_WINDOW + 4;
 const CLINCH_TICKS = 84;
 const CLINCH_COOLDOWN = 150;
 const CLINCH_RANGE = 30;

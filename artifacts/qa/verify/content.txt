@@ -1,0 +1,5 @@
+$ npx tsx tools/validate-content.ts
+
+  · 19 fighter states x 7 punches x 2 levels resolved to finite poses
+  · 8 fighters, 3 venues, 12 moves, 344 strings validated
+content validation passed

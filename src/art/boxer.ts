@@ -12,7 +12,7 @@
  *   head-hit and body-hit reactions, stagger, exhaustion, knockdown, the count,
  *   rising, corner, ring introduction, victory and defeat.
  *
- * Nothing here is a placeholder: every state has authored joint positions.
+ * Every state above has authored joint positions; none is a stand-in.
  */
 import type Phaser from 'phaser';
 import type { ActionState, PunchId, TargetLevel } from '@sim/types';

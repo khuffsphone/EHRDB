@@ -1,0 +1,66 @@
+{
+  "ranAt": "2026-08-01T21:42:47.329Z",
+  "steps": [
+    {
+      "step": "boots to the title screen",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "step": "reaches the main menu",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "step": "opens boxer creation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "step": "creates a career",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "step": "reaches opponent selection",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "step": "reaches the tale of the tape",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "step": "enters the ring",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "step": "the bout resolves to a result",
+      "ok": true,
+      "detail": "scene Result"
+    },
+    {
+      "step": "advances to training camp",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "step": "persists the career to storage",
+      "ok": true,
+      "detail": "4235 bytes"
+    },
+    {
+      "step": "offers to continue the saved career after reload",
+      "ok": true,
+      "detail": "focus \"Continue Career\""
+    },
+    {
+      "step": "reloads straight back into the career",
+      "ok": true,
+      "detail": "scene Training"
+    }
+  ],
+  "consoleErrors": []
+}

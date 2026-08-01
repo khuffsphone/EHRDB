@@ -271,7 +271,10 @@ export class AiController {
     if (incoming && sep < RANGE.jab + 8) {
       const read = this.rng.chance(this.difficulty.readAccuracy);
       const level: TargetLevel = read ? seen.activeLevel : this.rng.chance(0.5) ? 'head' : 'body';
-      const blockUtility = 0.85 + p.guardDiscipline * 0.7;
+      // How readily a fighter covers up when something is coming is the
+      // clearest behavioural line between a counterpuncher and a swarmer, so
+      // discipline dominates here rather than sitting on a large flat base.
+      const blockUtility = 0.3 + p.guardDiscipline * 1.5;
       if (level === 'body') add({ kind: 'crouch' }, blockUtility);
       else add({ kind: 'guard' }, blockUtility);
       add({ kind: 'slip', dir: this.rng.chance(0.5) ? 1 : -1 }, 0.6 + p.slipPreference * 0.8);

@@ -1,0 +1,16 @@
+$ npx tsx tools/qa-smoke.ts
+
+  ok    boots to the title screen
+  ok    reaches the main menu
+  ok    opens boxer creation
+  ok    creates a career
+  ok    reaches opponent selection
+  ok    reaches the tale of the tape
+  ok    enters the ring
+  ok    the bout resolves to a result — scene Result
+  ok    advances to training camp
+  ok    persists the career to storage — 4235 bytes
+  ok    offers to continue the saved career after reload — focus "Continue Career"
+  ok    reloads straight back into the career — scene Training
+
+smoke test passed: 12 steps, zero console errors

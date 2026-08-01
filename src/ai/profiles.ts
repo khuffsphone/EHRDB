@@ -94,7 +94,9 @@ export const AI_PROFILES: Record<ArchetypeId, AiProfile> = {
   // vulnerability window of whatever you just threw.
   counterpuncher: {
     archetype: 'counterpuncher',
-    targetRange: 40,
+    // Just outside the pocket: close enough to punish a lead, far enough that
+    // the lead has to be committed before it arrives.
+    targetRange: 42,
     rangeTolerance: 8,
     aggression: 0.34,
     riskTolerance: 0.34,
@@ -127,7 +129,7 @@ export const AI_PROFILES: Record<ArchetypeId, AiProfile> = {
   // Wins by having no hole. Shifts range and mix between rounds.
   boxer_puncher: {
     archetype: 'boxer_puncher',
-    targetRange: 40,
+    targetRange: 38,
     rangeTolerance: 8,
     aggression: 0.52,
     riskTolerance: 0.5,

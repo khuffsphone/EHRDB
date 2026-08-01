@@ -1,0 +1,35 @@
+$ npx tsx tools/soak.ts --mirror --bouts 200 --json artifacts/qa/soak-mirror.json
+
+
+AI SOAK — 200 bouts at difficulty "contender" [MIRROR: identical ratings, archetype only] (15.4s)
+
+  outcomes      KO 64  TKO 6  decision 115  draw 15
+  mean rounds   5.16
+  mean length   8.4 min of simulated time
+  mean accuracy 35.4%
+
+  archetype           win%   KO%   thrown  land%  head/body   KD+  KD-
+  boxer_puncher      42.5%   8.8%     357  31.8%     89/11    1   20
+  brawler            60.0%  93.8%     288  32.8%      99/1   49    9
+  counterpuncher     48.8%  10.3%     274  39.5%      94/6    1   10
+  out_boxer          45.0%   2.8%     349  33.5%      97/3    0   13
+  pressure           35.0%  60.7%     227  34.0%     56/44   20   19
+
+  archetype matchup matrix (row wins vs column, as row corner)
+                   boxer_pu   brawler  counterp  out_boxe  pressure
+  boxer_puncher           -   30%(10)   50%(10)   40%(10)   50%(10)
+  brawler           50%(10)         -   50%(10)   70%(10)   70%(10)
+  counterpuncher    60%(10)   70%(10)         -   10%(10)   70%(10)
+  out_boxer         40%(10)   30%(10)   50%(10)         -   20%(10)
+  pressure          40%(10)   30%(10)   20%(10)   30%(10)         -
+
+  punch mix (share of punches thrown, per archetype)
+  boxer_puncher     jab:41%  cross:32%  lead_hook:20%  rear_hook:2%  lead_upper:3%  rear_upper:2%
+  brawler           jab:18%  cross:26%  lead_hook:23%  rear_hook:20%  lead_upper:2%  rear_upper:11%
+  counterpuncher    jab:34%  cross:45%  lead_hook:12%  rear_hook:4%  lead_upper:4%  rear_upper:1%
+  out_boxer         jab:69%  cross:20%  lead_hook:10%  rear_hook:1%  lead_upper:0%  rear_upper:0%
+  pressure          jab:21%  cross:2%  lead_hook:43%  rear_hook:6%  lead_upper:26%  rear_upper:1%
+
+  no deadlocks, NaN, invalid transitions or impossible results.
+
+  wrote artifacts/qa/soak-mirror.json
