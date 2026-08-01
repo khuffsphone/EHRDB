@@ -1,7 +1,7 @@
 $ npx tsx tools/career-sim.ts --careers 12 --json artifacts/qa/career.json
 
 
-CAREER SIMULATION — 12 careers at "contender" (21.0s)
+CAREER SIMULATION — 12 careers at "contender" (24.5s)
 
   mean bouts fought   18.8 of 20
   mean record         12.3W

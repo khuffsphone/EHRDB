@@ -430,6 +430,28 @@ export function money(v: number): string {
   return `$${Math.round(v)}`;
 }
 
+/**
+ * Three-letter rating codes for places where a full name will not fit —
+ * summary rows and bar captions. Truncating the full label mid-word produced
+ * "Stami" and "Defen", which read as typos.
+ */
+const RATING_CODES: Record<string, string> = {
+  power: 'PWR',
+  stamina: 'STA',
+  speed: 'SPD',
+  defense: 'DEF',
+  chin: 'CHN',
+  bodyToughness: 'BDY',
+  recovery: 'REC',
+  footwork: 'FTW',
+  accuracy: 'ACC',
+  composure: 'CMP',
+};
+
+export function ratingCode(key: string): string {
+  return RATING_CODES[key] ?? key.slice(0, 3).toUpperCase();
+}
+
 export function record(w: number, l: number, d: number, ko?: number): string {
   const base = `${w}-${l}${d > 0 ? `-${d}` : ''}`;
   return ko === undefined ? base : `${base} (${ko} KO)`;

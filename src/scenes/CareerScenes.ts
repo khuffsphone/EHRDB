@@ -7,7 +7,7 @@ import { BaseScene } from '@game/BaseScene';
 import { Menu, VIEW, bar, label, panel, confirmDialog } from '@ui/kit';
 import { UI } from '@art/palettes';
 import { drawBoxer, POSES } from '@art/boxer';
-import { money, record, t } from '@ui/strings';
+import { money, ratingCode, record, t } from '@ui/strings';
 import { getFighter } from '@data/fighters';
 import { getVenue } from '@data/venues';
 import {
@@ -125,7 +125,7 @@ export class CareerHubScene extends BaseScene {
     ratings.forEach((k, i) => {
       label(this, 26, 214 + i * 0, '', { size: 7 });
       bar(g, 26 + i * 50, 216, 44, 6, c.player.ratings[k] / 100, UI.stamina, {});
-      label(this, 26 + i * 50, 224, t(`rating.${k}`).slice(0, 5), { size: 7, colour: UI.textDim });
+      label(this, 26 + i * 50, 224, ratingCode(k), { size: 7, colour: UI.textDim });
     });
   }
 
@@ -606,14 +606,14 @@ export class TrainingScene extends BaseScene {
     }
 
     this.paintBackground('training.title', t(`stage.${c.stage}`));
-    panel(this, 16, 40, 330, 262);
-    panel(this, 356, 40, 268, 262);
+    panel(this, 16, 40, 358, 262);
+    panel(this, 384, 40, 240, 262);
 
     this.header = label(this, 26, 50, '', { size: 10, colour: UI.accent });
-    this.info = label(this, 366, 60, '', { size: 9, colour: UI.text, wrap: 248 });
+    this.info = label(this, 392, 60, '', { size: 9, colour: UI.text, wrap: 224 });
 
     this.menu = new Menu(this, {
-      x: 26, y: 74, width: 310, rowHeight: 22, size: 10,
+      x: 26, y: 74, width: 338, rowHeight: 22, size: 9,
       onFocusChange: () => this.showInfo(),
     });
     this.rebuild();
@@ -667,7 +667,7 @@ export class TrainingScene extends BaseScene {
       return;
     }
     const synergy = o.synergy ? `\n${t('training.synergy', t(`archetype.${o.synergy}`))}` : '';
-    const gains = summarise(o.gains, o.secondaryGains) || t('training.noGain');
+    const gains = summariseLong(o.gains, o.secondaryGains) || t('training.noGain');
     this.info.setText(
       `${t(o.nameKey)}\n\n${t(o.descriptionKey)}\n\n${gains}\n${t('training.wear')}: ${o.wearCost > 0 ? '+' : ''}${o.wearCost.toFixed(1)}${synergy}`,
     );
@@ -683,11 +683,24 @@ export class TrainingScene extends BaseScene {
   }
 }
 
+/**
+ * Compact summary for the training row's value column. Full rating names
+ * overran the column and collided with the item name, so the row uses codes
+ * and the detail panel carries the readable version.
+ */
 function summarise(gains: Record<string, number | undefined>, secondary: Record<string, number | undefined>): string {
+  const parts: string[] = [];
+  for (const [k, v] of Object.entries(gains)) if (v) parts.push(`+${v} ${ratingCode(k)}`);
+  for (const [k, v] of Object.entries(secondary)) if (v) parts.push(`+${v} ${ratingCode(k)}`);
+  return parts.join(' ');
+}
+
+/** Readable version, for the detail panel where there is room. */
+function summariseLong(gains: Record<string, number | undefined>, secondary: Record<string, number | undefined>): string {
   const parts: string[] = [];
   for (const [k, v] of Object.entries(gains)) if (v) parts.push(`+${v} ${t(`rating.${k}`)}`);
   for (const [k, v] of Object.entries(secondary)) if (v) parts.push(`+${v} ${t(`rating.${k}`)}`);
-  return parts.join('  ');
+  return parts.join('   ');
 }
 
 // ---------------------------------------------------------------------------

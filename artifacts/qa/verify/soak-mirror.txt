@@ -1,7 +1,7 @@
 $ npx tsx tools/soak.ts --mirror --bouts 200 --json artifacts/qa/soak-mirror.json
 
 
-AI SOAK — 200 bouts at difficulty "contender" [MIRROR: identical ratings, archetype only] (15.4s)
+AI SOAK — 200 bouts at difficulty "contender" [MIRROR: identical ratings, archetype only] (18.1s)
 
   outcomes      KO 64  TKO 6  decision 115  draw 15
   mean rounds   5.16

@@ -4,50 +4,50 @@ $ npx vitest run --reporter=verbose
 [1m[46m RUN [49m[22m [36mv3.2.4 [39m[90m/home/user/EHRDB[39m
 
  [32m✓[39m tests/sim/determinism.test.ts[2m > [22mseeded RNG[2m > [22mproduces the same sequence for the same seed[32m 3[2mms[22m[39m
- [32m✓[39m tests/sim/determinism.test.ts[2m > [22mseeded RNG[2m > [22mdiverges immediately for adjacent seeds[32m 6[2mms[22m[39m
- [32m✓[39m tests/sim/determinism.test.ts[2m > [22mseeded RNG[2m > [22mround-trips its state exactly[32m 1[2mms[22m[39m
- [32m✓[39m tests/sim/determinism.test.ts[2m > [22mseeded RNG[2m > [22mstays within range[33m 355[2mms[22m[39m
+ [32m✓[39m tests/sim/determinism.test.ts[2m > [22mseeded RNG[2m > [22mdiverges immediately for adjacent seeds[32m 1[2mms[22m[39m
+ [32m✓[39m tests/sim/determinism.test.ts[2m > [22mseeded RNG[2m > [22mround-trips its state exactly[32m 0[2mms[22m[39m
+ [32m✓[39m tests/sim/determinism.test.ts[2m > [22mseeded RNG[2m > [22mstays within range[33m 376[2mms[22m[39m
  [32m✓[39m tests/sim/determinism.test.ts[2m > [22mseeded RNG[2m > [22mforks independent but reproducible streams[32m 0[2mms[22m[39m
- [32m✓[39m tests/sim/determinism.test.ts[2m > [22mbout determinism[2m > [22mproduces identical per-tick hashes for the same seed and inputs[33m 708[2mms[22m[39m
- [32m✓[39m tests/sim/determinism.test.ts[2m > [22mbout determinism[2m > [22mproduces a different history for a different seed[33m 457[2mms[22m[39m
- [32m✓[39m tests/sim/determinism.test.ts[2m > [22mbout determinism[2m > [22mreproduces a full AI bout exactly, including statistics[33m 353[2mms[22m[39m
- [32m✓[39m tests/sim/determinism.test.ts[2m > [22mbout determinism[2m > [22mis unaffected by the order in which corners are read[33m 5212[2mms[22m[39m
- [32m✓[39m tests/sim/determinism.test.ts[2m > [22mbout determinism[2m > [22mgolden hash: a fixed scripted input stream reproduces a known state[32m 3[2mms[22m[39m
- [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22mevery punch can land cleanly at its own range[32m 35[2mms[22m[39m
- [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22mevery punch is blocked by a guard at the matching level[32m 3[2mms[22m[39m
- [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22ma guard at the wrong level does not protect the exposed target[32m 2[2mms[22m[39m
- [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22mevery punch misses when thrown from out of range[32m 2[2mms[22m[39m
+ [32m✓[39m tests/sim/determinism.test.ts[2m > [22mbout determinism[2m > [22mproduces identical per-tick hashes for the same seed and inputs[33m 776[2mms[22m[39m
+ [32m✓[39m tests/sim/determinism.test.ts[2m > [22mbout determinism[2m > [22mproduces a different history for a different seed[33m 487[2mms[22m[39m
+ [32m✓[39m tests/sim/determinism.test.ts[2m > [22mbout determinism[2m > [22mreproduces a full AI bout exactly, including statistics[33m 382[2mms[22m[39m
+ [32m✓[39m tests/sim/determinism.test.ts[2m > [22mbout determinism[2m > [22mis unaffected by the order in which corners are read[33m 6153[2mms[22m[39m
+ [32m✓[39m tests/sim/determinism.test.ts[2m > [22mbout determinism[2m > [22mgolden hash: a fixed scripted input stream reproduces a known state[32m 2[2mms[22m[39m
+ [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22mevery punch can land cleanly at its own range[32m 25[2mms[22m[39m
+ [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22mevery punch is blocked by a guard at the matching level[32m 4[2mms[22m[39m
+ [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22ma guard at the wrong level does not protect the exposed target[32m 3[2mms[22m[39m
+ [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22mevery punch misses when thrown from out of range[32m 3[2mms[22m[39m
  [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22mevery punch is smothered when thrown from inside its minimum range[32m 1[2mms[22m[39m
  [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22ma slip evades a punch that would otherwise land[32m 1[2mms[22m[39m
- [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22mthrowing costs stamina, and holding position does not[32m 4[2mms[22m[39m
- [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22mexhaustion reduces output without disabling the fighter[32m 5[2mms[22m[39m
- [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22mcounters require the opponent to be inside their own vulnerability window[32m 1[2mms[22m[39m
+ [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22mthrowing costs stamina, and holding position does not[32m 5[2mms[22m[39m
+ [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22mexhaustion reduces output without disabling the fighter[32m 6[2mms[22m[39m
+ [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22mcounters require the opponent to be inside their own vulnerability window[32m 2[2mms[22m[39m
  [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22ma counter does more than the same punch landing clean[32m 0[2mms[22m[39m
- [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22ma whiffed punch costs extra recovery, so missing is punishable[32m 0[2mms[22m[39m
- [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22minput buffering accepts a punch queued late in commitment[32m 6[2mms[22m[39m
+ [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22ma whiffed punch costs extra recovery, so missing is punishable[32m 1[2mms[22m[39m
+ [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22minput buffering accepts a punch queued late in commitment[32m 1[2mms[22m[39m
  [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22mdrops an input asked for outside the buffer window[32m 0[2mms[22m[39m
- [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22ma fighter cannot punch backwards[32m 0[2mms[22m[39m
- [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22mbody work drains the opponent faster than head work[32m 20[2mms[22m[39m
+ [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22ma fighter cannot punch backwards[32m 1[2mms[22m[39m
+ [32m✓[39m tests/sim/combat.test.ts[2m > [22mpunch resolution[2m > [22mbody work drains the opponent faster than head work[32m 24[2mms[22m[39m
  [32m✓[39m tests/sim/combat.test.ts[2m > [22mfighter state machine[2m > [22mrejects an illegal transition loudly[32m 1[2mms[22m[39m
- [32m✓[39m tests/sim/combat.test.ts[2m > [22mfighter state machine[2m > [22mdeclares a transition table for every state[32m 8[2mms[22m[39m
+ [32m✓[39m tests/sim/combat.test.ts[2m > [22mfighter state machine[2m > [22mdeclares a transition table for every state[32m 7[2mms[22m[39m
  [32m✓[39m tests/sim/combat.test.ts[2m > [22mfighter state machine[2m > [22mnever lets a grounded fighter act[32m 0[2mms[22m[39m
- [32m✓[39m tests/sim/combat.test.ts[2m > [22mring geometry[2m > [22mkeeps both fighters inside the ropes[33m 452[2mms[22m[39m
- [32m✓[39m tests/sim/combat.test.ts[2m > [22mring geometry[2m > [22mnever lets fighters occupy the same space[32m 22[2mms[22m[39m
- [32m✓[39m tests/sim/outcomes.test.ts[2m > [22mbout outcomes[2m > [22mreaches knockout, technical knockout and decision across a sample[33m 10931[2mms[22m[39m
- [32m✓[39m tests/ai/fairness.test.ts[2m > [22mthe public view[2m > [22mnever exposes private simulation state[32m 3[2mms[22m[39m
- [32m✓[39m tests/ai/fairness.test.ts[2m > [22mthe public view[2m > [22mhides a punch that has not visibly started[32m 0[2mms[22m[39m
+ [32m✓[39m tests/sim/combat.test.ts[2m > [22mring geometry[2m > [22mkeeps both fighters inside the ropes[33m 505[2mms[22m[39m
+ [32m✓[39m tests/sim/combat.test.ts[2m > [22mring geometry[2m > [22mnever lets fighters occupy the same space[32m 29[2mms[22m[39m
+ [32m✓[39m tests/sim/outcomes.test.ts[2m > [22mbout outcomes[2m > [22mreaches knockout, technical knockout and decision across a sample[33m 11655[2mms[22m[39m
+ [32m✓[39m tests/ai/fairness.test.ts[2m > [22mthe public view[2m > [22mnever exposes private simulation state[32m 4[2mms[22m[39m
+ [32m✓[39m tests/ai/fairness.test.ts[2m > [22mthe public view[2m > [22mhides a punch that has not visibly started[32m 1[2mms[22m[39m
  [32m✓[39m tests/ai/fairness.test.ts[2m > [22mthe public view[2m > [22mreports condition as fractions, matching what the HUD bars show[32m 1[2mms[22m[39m
  [32m✓[39m tests/ai/fairness.test.ts[2m > [22mAI perception limits[2m > [22mcannot react to a punch faster than its perception latency allows[32m 0[2mms[22m[39m
  [32m✓[39m tests/ai/fairness.test.ts[2m > [22mAI perception limits[2m > [22mproduces identical decisions for identical seeds and views[32m 5[2mms[22m[39m
- [32m✓[39m tests/ai/fairness.test.ts[2m > [22mAI perception limits[2m > [22monly ever emits commands a player could also produce[32m 268[2mms[22m[39m
- [32m✓[39m tests/ai/fairness.test.ts[2m > [22marchetype distinctiveness[2m > [22mevery required archetype has a profile[32m 0[2mms[22m[39m
+ [32m✓[39m tests/ai/fairness.test.ts[2m > [22mAI perception limits[2m > [22monly ever emits commands a player could also produce[32m 275[2mms[22m[39m
+ [32m✓[39m tests/ai/fairness.test.ts[2m > [22marchetype distinctiveness[2m > [22mevery required archetype has a profile[32m 1[2mms[22m[39m
  [32m✓[39m tests/ai/fairness.test.ts[2m > [22marchetype distinctiveness[2m > [22mthe pressure fighter works closer than the out-boxer[32m 0[2mms[22m[39m
  [32m✓[39m tests/ai/fairness.test.ts[2m > [22marchetype distinctiveness[2m > [22mthe pressure fighter goes to the body far more than the out-boxer[32m 0[2mms[22m[39m
  [32m✓[39m tests/ai/fairness.test.ts[2m > [22marchetype distinctiveness[2m > [22mthe counterpuncher guards more than the pressure fighter[32m 0[2mms[22m[39m
  [32m✓[39m tests/ai/fairness.test.ts[2m > [22marchetype distinctiveness[2m > [22mthe out-boxer leans on the jab and the brawler does not[32m 0[2mms[22m[39m
  [32m✓[39m tests/ai/fairness.test.ts[2m > [22marchetype distinctiveness[2m > [22mthe brawler throws more power punches than the out-boxer[32m 0[2mms[22m[39m
  [32m✓[39m tests/ai/fairness.test.ts[2m > [22marchetype distinctiveness[2m > [22mno two archetypes produce the same punch mix[32m 0[2mms[22m[39m
- [32m✓[39m tests/ai/fairness.test.ts[2m > [22mdifficulty[2m > [22madjusts perception and discipline, never the fighter itself[32m 171[2mms[22m[39m
+ [32m✓[39m tests/ai/fairness.test.ts[2m > [22mdifficulty[2m > [22madjusts perception and discipline, never the fighter itself[32m 157[2mms[22m[39m
  [32m✓[39m tests/ai/fairness.test.ts[2m > [22mdifficulty[2m > [22morders reaction time from slowest to fastest[32m 0[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22mboxer creation[2m > [22mspends exactly the point pool by default[32m 2[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22mboxer creation[2m > [22mrejects an unnamed boxer and an unspent pool[32m 2[2mms[22m[39m
@@ -58,88 +58,88 @@ $ npx vitest run --reporter=verbose
  [32m✓[39m tests/career/career.test.ts[2m > [22mtraining[2m > [22mapplies diminishing returns above the soft cap[32m 0[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22mtraining[2m > [22mnever exceeds the hard cap[32m 0[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22mtraining[2m > [22mimproves an older fighter more slowly[32m 0[2mms[22m[39m
- [32m✓[39m tests/career/career.test.ts[2m > [22mtraining[2m > [22mactually raises the fighter when taken[32m 3[2mms[22m[39m
+ [32m✓[39m tests/career/career.test.ts[2m > [22mtraining[2m > [22mactually raises the fighter when taken[32m 2[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22mtraining[2m > [22mawards fewer choices for a loss than for a win[32m 0[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22mthe ladder[2m > [22mstarts the player unranked with a legal set of opponents[32m 0[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22mthe ladder[2m > [22mexchanges ranks when the player beats someone above them[32m 1[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22mthe ladder[2m > [22mexchanges ranks when the player loses to someone below them[32m 1[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22mthe ladder[2m > [22mdoes not move the player for losing to someone ranked above them[32m 0[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22mthe ladder[2m > [22mscales purse and distance with the stakes[32m 0[2mms[22m[39m
- [32m✓[39m tests/career/career.test.ts[2m > [22mthe ladder[2m > [22mdescribes a bout the same way the result will resolve it[32m 1[2mms[22m[39m
- [32m✓[39m tests/career/career.test.ts[2m > [22mthe ladder[2m > [22mbuilds a runnable bout configuration[32m 255[2mms[22m[39m
+ [32m✓[39m tests/career/career.test.ts[2m > [22mthe ladder[2m > [22mdescribes a bout the same way the result will resolve it[32m 0[2mms[22m[39m
+ [32m✓[39m tests/career/career.test.ts[2m > [22mthe ladder[2m > [22mbuilds a runnable bout configuration[32m 217[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22mchallenges[2m > [22maccepting a challenge queues that opponent[32m 1[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22mchallenges[2m > [22mrefusing a challenge costs the challenger’s rank[32m 1[2mms[22m[39m
- [32m✓[39m tests/career/career.test.ts[2m > [22ma complete career[2m > [22mruns to a conclusion without dead ends[32m 9[2mms[22m[39m
+ [32m✓[39m tests/career/career.test.ts[2m > [22ma complete career[2m > [22mruns to a conclusion without dead ends[32m 12[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22ma complete career[2m > [22mends at the bout cap[32m 0[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22ma complete career[2m > [22mrebuilds once before retiring a losing run, then retires[32m 0[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22ma complete career[2m > [22mages the fighter after the career clock passes the threshold[32m 1[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22ma complete career[2m > [22mgrades a title-winning career above a losing one[32m 1[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22ma complete career[2m > [22mproduces a legacy record on retirement[32m 0[2mms[22m[39m
  [32m✓[39m tests/career/career.test.ts[2m > [22ma complete career[2m > [22mis reproducible from its seed[32m 1[2mms[22m[39m
- [32m✓[39m tests/ai/soak.test.ts[2m > [22mAI soak[2m > [22mcompletes 120 seeded bouts on the ranked roster with no failures[33m 13997[2mms[22m[39m
+ [32m✓[39m tests/ai/soak.test.ts[2m > [22mAI soak[2m > [22mcompletes 120 seeded bouts on the ranked roster with no failures[33m 15256[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mthe roster[2m > [22mhas the required number of fighters[32m 1[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mthe roster[2m > [22muses unique ids and unique starting ranks[32m 1[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mthe roster[2m > [22mcovers every required archetype[32m 0[2mms[22m[39m
- [32m✓[39m tests/content/content.test.ts[2m > [22mthe roster[2m > [22mkeeps every rating inside a legal range[32m 5[2mms[22m[39m
+ [32m✓[39m tests/content/content.test.ts[2m > [22mthe roster[2m > [22mkeeps every rating inside a legal range[32m 4[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mthe roster[2m > [22mreferences only defined appearance keys[32m 3[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mthe roster[2m > [22mhas a scouting line for every fighter[32m 0[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mthe roster[2m > [22mis visually separable — no two fighters share a whole look[32m 0[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mthe roster[2m > [22mthrows on an unknown fighter rather than returning junk[32m 1[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mvenues[2m > [22mprovides the required three, with unique ids[32m 0[2mms[22m[39m
- [32m✓[39m tests/content/content.test.ts[2m > [22mvenues[2m > [22mgives each venue its own palette and name[32m 0[2mms[22m[39m
+ [32m✓[39m tests/content/content.test.ts[2m > [22mvenues[2m > [22mgives each venue its own palette and name[32m 1[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mvenues[2m > [22mthrows on an unknown venue[32m 0[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mrulesets[2m > [22msupports the required bout lengths[32m 1[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mrulesets[2m > [22mexpresses every duration in whole ticks[32m 0[2mms[22m[39m
- [32m✓[39m tests/content/content.test.ts[2m > [22mthe punch table[2m > [22mdefines every punch at both levels[32m 6[2mms[22m[39m
+ [32m✓[39m tests/content/content.test.ts[2m > [22mthe punch table[2m > [22mdefines every punch at both levels[32m 9[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mthe punch table[2m > [22mgives every punch a distinct tactical role[32m 1[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mthe punch table[2m > [22mmakes body shots trade knockdown pressure for lasting damage[32m 1[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mthe punch table[2m > [22morders the jab as the fastest and the rear uppercut as the hardest[32m 0[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mthe punch table[2m > [22mexposes both level tables[32m 0[2mms[22m[39m
- [32m✓[39m tests/content/content.test.ts[2m > [22mAI data[2m > [22mdefines a profile for every archetype used by the roster[32m 1[2mms[22m[39m
+ [32m✓[39m tests/content/content.test.ts[2m > [22mAI data[2m > [22mdefines a profile for every archetype used by the roster[32m 2[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mAI data[2m > [22mgives every archetype a distinct preferred range and punch mix[32m 0[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mAI data[2m > [22mkeeps every profile weight inside its stated bounds[32m 2[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mAI data[2m > [22mnames every difficulty in the string table[32m 0[2mms[22m[39m
- [32m✓[39m tests/content/content.test.ts[2m > [22minput bindings[2m > [22mbinds every action on both devices by default[32m 2[2mms[22m[39m
+ [32m✓[39m tests/content/content.test.ts[2m > [22minput bindings[2m > [22mbinds every action on both devices by default[32m 1[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22minput bindings[2m > [22mnever binds two different keyboard actions to one key[32m 0[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22minput bindings[2m > [22mmarks the actions the remap screen refuses to leave unbound[32m 1[2mms[22m[39m
- [32m✓[39m tests/content/content.test.ts[2m > [22mthe string table[2m > [22mresolves every key referenced by content[32m 3[2mms[22m[39m
+ [32m✓[39m tests/content/content.test.ts[2m > [22mthe string table[2m > [22mresolves every key referenced by content[32m 2[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mthe string table[2m > [22mhas no blank entries[32m 7[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mthe string table[2m > [22msubstitutes arguments and leaves unknown keys visible[32m 0[2mms[22m[39m
  [32m✓[39m tests/content/content.test.ts[2m > [22mthe string table[2m > [22mformats money and records consistently[32m 0[2mms[22m[39m
- [32m✓[39m tests/content/content.test.ts[2m > [22mthe string table[2m > [22mcontains no reference to the historical work this project draws on[32m 0[2mms[22m[39m
+ [32m✓[39m tests/content/content.test.ts[2m > [22mthe string table[2m > [22mcontains no reference to the historical work this project draws on[32m 1[2mms[22m[39m
  [32m✓[39m tests/save/save.test.ts[2m > [22msave parsing[2m > [22maccepts a current save unchanged[32m 2[2mms[22m[39m
  [32m✓[39m tests/save/save.test.ts[2m > [22msave parsing[2m > [22mrejects text that is not JSON, keeping the original bytes[32m 0[2mms[22m[39m
  [32m✓[39m tests/save/save.test.ts[2m > [22msave parsing[2m > [22mrejects a save from another game[32m 0[2mms[22m[39m
  [32m✓[39m tests/save/save.test.ts[2m > [22msave parsing[2m > [22mrefuses a save from a newer build rather than mangling it[32m 0[2mms[22m[39m
- [32m✓[39m tests/save/save.test.ts[2m > [22msave parsing[2m > [22mmigrates a version 1 save all the way forward without losing data[32m 1[2mms[22m[39m
- [32m✓[39m tests/save/save.test.ts[2m > [22msave parsing[2m > [22mfills in fields a hand-edited save is missing[32m 0[2mms[22m[39m
+ [32m✓[39m tests/save/save.test.ts[2m > [22msave parsing[2m > [22mmigrates a version 1 save all the way forward without losing data[32m 2[2mms[22m[39m
+ [32m✓[39m tests/save/save.test.ts[2m > [22msave parsing[2m > [22mfills in fields a hand-edited save is missing[32m 1[2mms[22m[39m
  [32m✓[39m tests/save/save.test.ts[2m > [22mthe save store[2m > [22mround-trips a full career through export and import[32m 2[2mms[22m[39m
  [32m✓[39m tests/save/save.test.ts[2m > [22mthe save store[2m > [22mreports an import failure instead of destroying the current save[32m 1[2mms[22m[39m
- [32m✓[39m tests/save/save.test.ts[2m > [22mthe save store[2m > [22mrecovers from the backup when the primary save is corrupt[32m 1[2mms[22m[39m
- [32m✓[39m tests/save/save.test.ts[2m > [22mthe save store[2m > [22mquarantines rather than deletes when nothing is readable[32m 0[2mms[22m[39m
+ [32m✓[39m tests/save/save.test.ts[2m > [22mthe save store[2m > [22mrecovers from the backup when the primary save is corrupt[32m 4[2mms[22m[39m
+ [32m✓[39m tests/save/save.test.ts[2m > [22mthe save store[2m > [22mquarantines rather than deletes when nothing is readable[32m 1[2mms[22m[39m
  [32m✓[39m tests/save/save.test.ts[2m > [22mthe save store[2m > [22mstarts clean when there is no save at all[32m 0[2mms[22m[39m
  [32m✓[39m tests/save/save.test.ts[2m > [22mthe save store[2m > [22mreloads exactly what it wrote[32m 0[2mms[22m[39m
  [32m✓[39m tests/save/save.test.ts[2m > [22mthe save store[2m > [22merases everything on reset[32m 0[2mms[22m[39m
- [32m✓[39m tests/save/save.test.ts[2m > [22mthe save store[2m > [22msurvives storage that throws on write[32m 11[2mms[22m[39m
- [32m✓[39m tests/sim/outcomes.test.ts[2m > [22mbout outcomes[2m > [22mnever returns a decision before the final round[33m 6980[2mms[22m[39m
- [32m✓[39m tests/sim/outcomes.test.ts[2m > [22mbout outcomes[2m > [22mscorecards reconcile with their round scores[33m 4911[2mms[22m[39m
- [32m✓[39m tests/sim/outcomes.test.ts[2m > [22mbout outcomes[2m > [22magrees with the cards it reports for a decision[33m 6755[2mms[22m[39m
- [32m✓[39m tests/ai/soak.test.ts[2m > [22mAI soak[2m > [22mcompletes 120 control bouts where only the archetype differs[33m 16400[2mms[22m[39m
+ [32m✓[39m tests/save/save.test.ts[2m > [22mthe save store[2m > [22msurvives storage that throws on write[32m 10[2mms[22m[39m
+ [32m✓[39m tests/sim/outcomes.test.ts[2m > [22mbout outcomes[2m > [22mnever returns a decision before the final round[33m 7239[2mms[22m[39m
+ [32m✓[39m tests/sim/outcomes.test.ts[2m > [22mbout outcomes[2m > [22mscorecards reconcile with their round scores[33m 4880[2mms[22m[39m
+ [32m✓[39m tests/sim/outcomes.test.ts[2m > [22mbout outcomes[2m > [22magrees with the cards it reports for a decision[33m 6376[2mms[22m[39m
+ [32m✓[39m tests/ai/soak.test.ts[2m > [22mAI soak[2m > [22mcompletes 120 control bouts where only the archetype differs[33m 15624[2mms[22m[39m
  [32m✓[39m tests/sim/outcomes.test.ts[2m > [22mbout outcomes[2m > [22ma knocked-down fighter cannot win the round on any card[32m 1[2mms[22m[39m
  [32m✓[39m tests/sim/outcomes.test.ts[2m > [22mbout outcomes[2m > [22mscores a round with no activity even[32m 0[2mms[22m[39m
  [32m✓[39m tests/sim/outcomes.test.ts[2m > [22mbout outcomes[2m > [22mbuilds one card per judge[32m 0[2mms[22m[39m
- [32m✓[39m tests/sim/outcomes.test.ts[2m > [22mbout outcomes[2m > [22mresolves a bout even when neither fighter does anything[32m 35[2mms[22m[39m
+ [32m✓[39m tests/sim/outcomes.test.ts[2m > [22mbout outcomes[2m > [22mresolves a bout even when neither fighter does anything[32m 30[2mms[22m[39m
  [32m✓[39m tests/sim/outcomes.test.ts[2m > [22mbout outcomes[2m > [22mcounts a fighter out when they cannot beat the count[32m 1[2mms[22m[39m
  [32m✓[39m tests/sim/outcomes.test.ts[2m > [22mbout outcomes[2m > [22mends the round on the three-knockdown rule[32m 0[2mms[22m[39m
- [32m✓[39m tests/sim/outcomes.test.ts[2m > [22mbout outcomes[2m > [22mnever produces an impossible result[33m 6522[2mms[22m[39m
- [32m✓[39m tests/ai/soak.test.ts[2m > [22mAI soak[2m > [22mkeeps every archetype competitive when ratings are held equal[33m 25014[2mms[22m[39m
- [32m✓[39m tests/ai/soak.test.ts[2m > [22mAI soak[2m > [22mproduces reproducible results across identical runs[33m 5963[2mms[22m[39m
- [32m✓[39m tests/ai/soak.test.ts[2m > [22mAI soak[2m > [22mdoes not leak memory across a long batch[33m 18112[2mms[22m[39m
+ [32m✓[39m tests/sim/outcomes.test.ts[2m > [22mbout outcomes[2m > [22mnever produces an impossible result[33m 6510[2mms[22m[39m
+ [32m✓[39m tests/ai/soak.test.ts[2m > [22mAI soak[2m > [22mkeeps every archetype competitive when ratings are held equal[33m 23550[2mms[22m[39m
+ [32m✓[39m tests/ai/soak.test.ts[2m > [22mAI soak[2m > [22mproduces reproducible results across identical runs[33m 5925[2mms[22m[39m
+ [32m✓[39m tests/ai/soak.test.ts[2m > [22mAI soak[2m > [22mdoes not leak memory across a long batch[33m 16853[2mms[22m[39m
 
 [2m Test Files [22m [1m[32m8 passed[39m[22m[90m (8)[39m
 [2m      Tests [22m [1m[32m132 passed[39m[22m[90m (132)[39m
-[2m   Start at [22m 21:36:14
-[2m   Duration [22m 80.29s[2m (transform 888ms, setup 0ms, collect 5.62s, tests 124.11s, environment 2ms, prepare 819ms)[22m
+[2m   Start at [22m 22:03:36
+[2m   Duration [22m 77.95s[2m (transform 823ms, setup 0ms, collect 5.89s, tests 123.49s, environment 2ms, prepare 884ms)[22m
 
 [90mstderr[2m | tests/save/save.test.ts[2m > [22m[2mthe save store[2m > [22m[2msurvives storage that throws on write
 [22m[39mSave write failed: Error: quota exceeded
