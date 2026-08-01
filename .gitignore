@@ -1,0 +1,19 @@
+node_modules/
+dist/
+dist-repro/
+coverage/
+*.log
+.DS_Store
+.vite/
+
+# Staged third-party reference exports — never committed (see references/SOURCE_REGISTRY.md)
+references/drive/
+references/private-rom/
+artifacts/private-repro/
+
+# Local-only build profile override
+.local/
+
+# QA evidence is generated; large binaries excluded from the repo by default
+artifacts/qa/**/*.webm
+artifacts/qa/**/*.zip
