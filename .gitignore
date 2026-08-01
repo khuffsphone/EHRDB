@@ -17,3 +17,4 @@ artifacts/private-repro/
 # QA evidence is generated; large binaries excluded from the repo by default
 artifacts/qa/**/*.webm
 artifacts/qa/**/*.zip
+tsconfig.tsbuildinfo
