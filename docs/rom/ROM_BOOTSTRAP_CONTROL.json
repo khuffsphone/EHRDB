@@ -1,0 +1,100 @@
+{
+  "schema": "ehrdb-rom-bootstrap-control-v1",
+  "source_sha256": "b13f1e31bf6ba739e4cffd98374263b3421b3a61c4873e30dbc866198736e880",
+  "proofs": [
+    {"name":"reset_bootstrap","offset_hex":"0x000200","length":262,"sha256":"36441b0466ae870b07dcbd9d22ac8eda98ff79873aa374bb4a71cc5ab7864203","status":"MATCH"},
+    {"name":"reset_jump","offset_hex":"0x000300","length":6,"sha256":"32c789dd55dd21ce84cdf4f920a71a485c66737c3407eaa39415d241b6bc38fc","status":"MATCH"},
+    {"name":"main_entry","offset_hex":"0x001710","length":58,"sha256":"d05cd71baddab8cfa65f5f33045cad410adb36fb740fd59d0565bc5e7dc51f25","status":"MATCH"},
+    {"name":"level4_handler","offset_hex":"0x000754","length":116,"sha256":"31483cdede14005e2392741003404cb72b2080c6edddcdb3a88ec25c40e5cc67","status":"MATCH"},
+    {"name":"level6_wrapper","offset_hex":"0x000940","length":4,"sha256":"1f61cc05f7561c2c1b5e66fac04f32540232e137793db8054f528fed6b8763e7","status":"MATCH"},
+    {"name":"level6_core_prologue","offset_hex":"0x00095C","length":42,"sha256":"b89a68d4a8281d0a74370d9c3601ec803a91dedcdc1c97035fb8812a6e8bda3b","status":"MATCH"},
+    {"name":"state_dispatch","offset_hex":"0x00A5C6","length":14,"sha256":"48f25c376b501f186e8eb08ec48a477782b9d6909f4ac8bbccdb95e5e47c44d9","status":"MATCH"},
+    {"name":"state_table","offset_hex":"0x00A608","length":204,"sha256":"c6058c83ca1ff1c8ca5c3e9ce5fc9034a62a7c5bb0ad62d26b8add4d511b4aeb","status":"MATCH"}
+  ],
+  "vectors": {
+    "initial_ssp": {"value":4294967270,"value_hex":"0xFFFFFFE6"},
+    "reset": {"value":512,"value_hex":"0x00000200"},
+    "level4": {"value":1876,"value_hex":"0x00000754"},
+    "level6": {"value":2368,"value_hex":"0x00000940"}
+  },
+  "reset_flow": {
+    "reset_entry_hex":"0x000200",
+    "direct_jump_offset_hex":"0x000300",
+    "direct_jump_target_hex":"0x001710",
+    "tmss_literal_offset_hex":"0x000228",
+    "vdp_status_test_offset_hex":"0x0002FA"
+  },
+  "interrupts": {
+    "level4_hblank":{"entry_hex":"0x000754","verified_end_exclusive_hex":"0x0007C8","callback_pointer_ram_hex":"0xFFF880"},
+    "level6_vblank":{"entry_hex":"0x000940","wrapper_target_hex":"0x00095C","wrapper_returns_with":"RTE","callback_pointer_ram_hex":"0xFFF878"}
+  },
+  "main_entry": {
+    "entry_hex":"0x001710",
+    "startup_calls":[
+      {"offset_hex":"0x001718","kind":"BSR.W","target":3100,"target_hex":"0x000C1C"},
+      {"offset_hex":"0x001726","kind":"JSR.L","target":181258,"target_hex":"0x02C40A"},
+      {"offset_hex":"0x00172C","kind":"JSR.L","target":32196,"target_hex":"0x007DC4"},
+      {"offset_hex":"0x001732","kind":"BSR.W","target":3474,"target_hex":"0x000D92"},
+      {"offset_hex":"0x001736","kind":"BSR.W","target":774,"target_hex":"0x000306"},
+      {"offset_hex":"0x00173A","kind":"BSR.W","target":3066,"target_hex":"0x000BFA"},
+      {"offset_hex":"0x00173E","kind":"JSR.W","target":3124,"target_hex":"0x000C34"},
+      {"offset_hex":"0x001742","kind":"JMP.L","target":42212,"target_hex":"0x00A4E4"}
+    ],
+    "stack_reset_hex":"0xFFFFE6",
+    "top_level_loop_hex":"0x00A4E4"
+  },
+  "state_dispatch": {
+    "dispatch_offset_hex":"0x00A5C6",
+    "state_ram_hex":"0xFFF884",
+    "record_stride":6,
+    "table_base_hex":"0x00A608",
+    "state_limit_inclusive":33,
+    "record_count":34,
+    "null_state_count":1,
+    "nonzero_state_count":33,
+    "unique_handler_count":13,
+    "handler_reuse":{"0x00BD9A":2,"0x00BDE6":1,"0x00BDEE":1,"0x00BDF6":1,"0x00C048":1,"0x00C066":1,"0x00C06E":1,"0x00C076":1,"0x00C07E":4,"0x00C086":5,"0x00C08E":4,"0x00C0CE":6,"0x00C13A":5},
+    "parameter_distribution":{"0x0000":5,"0x0006":4,"0x0008":5,"0x0010":2,"0x0020":4,"0x003C":2,"0x003F":5,"0x0080":1,"0x00C0":4,"0x0100":1,"0x0500":1},
+    "records":[
+      {"state":0,"record_offset_hex":"0x00A608","handler_hex":"0x000000","parameter_hex":"0x0000","null":true},
+      {"state":1,"record_offset_hex":"0x00A60E","handler_hex":"0x00C086","parameter_hex":"0x003C","null":false},
+      {"state":2,"record_offset_hex":"0x00A614","handler_hex":"0x00C07E","parameter_hex":"0x0008","null":false},
+      {"state":3,"record_offset_hex":"0x00A61A","handler_hex":"0x00C13A","parameter_hex":"0x003C","null":false},
+      {"state":4,"record_offset_hex":"0x00A620","handler_hex":"0x00C07E","parameter_hex":"0x00C0","null":false},
+      {"state":5,"record_offset_hex":"0x00A626","handler_hex":"0x00C0CE","parameter_hex":"0x0006","null":false},
+      {"state":6,"record_offset_hex":"0x00A62C","handler_hex":"0x00C08E","parameter_hex":"0x0020","null":false},
+      {"state":7,"record_offset_hex":"0x00A632","handler_hex":"0x00C048","parameter_hex":"0x0000","null":false},
+      {"state":8,"record_offset_hex":"0x00A638","handler_hex":"0x00C086","parameter_hex":"0x0020","null":false},
+      {"state":9,"record_offset_hex":"0x00A63E","handler_hex":"0x00C066","parameter_hex":"0x0000","null":false},
+      {"state":10,"record_offset_hex":"0x00A644","handler_hex":"0x00C086","parameter_hex":"0x0008","null":false},
+      {"state":11,"record_offset_hex":"0x00A64A","handler_hex":"0x00C13A","parameter_hex":"0x00C0","null":false},
+      {"state":12,"record_offset_hex":"0x00A650","handler_hex":"0x00C0CE","parameter_hex":"0x0006","null":false},
+      {"state":13,"record_offset_hex":"0x00A656","handler_hex":"0x00C08E","parameter_hex":"0x0020","null":false},
+      {"state":14,"record_offset_hex":"0x00A65C","handler_hex":"0x00C06E","parameter_hex":"0x0000","null":false},
+      {"state":15,"record_offset_hex":"0x00A662","handler_hex":"0x00C086","parameter_hex":"0x0020","null":false},
+      {"state":16,"record_offset_hex":"0x00A668","handler_hex":"0x00C076","parameter_hex":"0x0000","null":false},
+      {"state":17,"record_offset_hex":"0x00A66E","handler_hex":"0x00C086","parameter_hex":"0x0008","null":false},
+      {"state":18,"record_offset_hex":"0x00A674","handler_hex":"0x00C13A","parameter_hex":"0x00C0","null":false},
+      {"state":19,"record_offset_hex":"0x00A67A","handler_hex":"0x00C0CE","parameter_hex":"0x003F","null":false},
+      {"state":20,"record_offset_hex":"0x00A680","handler_hex":"0x00BDF6","parameter_hex":"0x00C0","null":false},
+      {"state":21,"record_offset_hex":"0x00A686","handler_hex":"0x00C0CE","parameter_hex":"0x0006","null":false},
+      {"state":22,"record_offset_hex":"0x00A68C","handler_hex":"0x00C08E","parameter_hex":"0x003F","null":false},
+      {"state":23,"record_offset_hex":"0x00A692","handler_hex":"0x00BD9A","parameter_hex":"0x0010","null":false},
+      {"state":24,"record_offset_hex":"0x00A698","handler_hex":"0x00C07E","parameter_hex":"0x0008","null":false},
+      {"state":25,"record_offset_hex":"0x00A69E","handler_hex":"0x00C13A","parameter_hex":"0x0080","null":false},
+      {"state":26,"record_offset_hex":"0x00A6A4","handler_hex":"0x00C0CE","parameter_hex":"0x003F","null":false},
+      {"state":27,"record_offset_hex":"0x00A6AA","handler_hex":"0x00BDEE","parameter_hex":"0x0100","null":false},
+      {"state":28,"record_offset_hex":"0x00A6B0","handler_hex":"0x00C0CE","parameter_hex":"0x0006","null":false},
+      {"state":29,"record_offset_hex":"0x00A6B6","handler_hex":"0x00C08E","parameter_hex":"0x003F","null":false},
+      {"state":30,"record_offset_hex":"0x00A6BC","handler_hex":"0x00BD9A","parameter_hex":"0x0010","null":false},
+      {"state":31,"record_offset_hex":"0x00A6C2","handler_hex":"0x00C07E","parameter_hex":"0x0008","null":false},
+      {"state":32,"record_offset_hex":"0x00A6C8","handler_hex":"0x00C13A","parameter_hex":"0x003F","null":false},
+      {"state":33,"record_offset_hex":"0x00A6CE","handler_hex":"0x00BDE6","parameter_hex":"0x0500","null":false}
+    ]
+  },
+  "semantic_limits":[
+    "Handler addresses and descriptor parameters are verified; human-readable scene names are not assigned.",
+    "Level-4 and level-6 HBlank/VBlank labels follow Genesis autovector convention and observed VDP access.",
+    "This is a bounded control-flow atlas, not a complete instruction disassembly."
+  ]
+}
