@@ -1,0 +1,83 @@
+{
+  "schema": "ehrdb-rom-public-metadata-v1",
+  "measurement_scope": "static private-ROM inspection; no ROM bytes or extracted art included",
+  "hashes": {
+    "size_bytes": 524288,
+    "md5": "91f8f3ef27055687a12015b0123cc067",
+    "sha1": "eb4aca22f8b5837a0a0b10491c46714948b09844",
+    "sha256": "b13f1e31bf6ba739e4cffd98374263b3421b3a61c4873e30dbc866198736e880"
+  },
+  "header": {
+    "console_name": "SEGA GENESIS",
+    "copyright": "(C)SEGA 1992.JUL",
+    "domestic_title": "EVANDER HOLYFIELD'S REAL DEAL BOXING",
+    "international_title": "EVANDER HOLYFIELD'S REAL DEAL BOXING",
+    "serial_version": "GM MK-1215 -00",
+    "io_support": "J",
+    "region": "U",
+    "header_checksum": 30223,
+    "computed_checksum": 30223,
+    "rom_start": 0,
+    "rom_end": 524287,
+    "ram_start": 16711680,
+    "ram_end": 16777215,
+    "backup_memory": {
+      "signature": "RA",
+      "flags_raw": "E840",
+      "start": 2097153,
+      "end": 2097153
+    },
+    "checksum_match": true,
+    "declared_rom_size": 524288,
+    "declared_size_matches_file": true
+  },
+  "vectors": [
+    {"index": 0, "name": "initial_ssp", "table_offset": 0, "value_hex": "0xFFFFFFE6", "masked_24bit_hex": "0xFFFFE6", "class": "WORK_RAM"},
+    {"index": 1, "name": "reset_pc", "table_offset": 4, "value_hex": "0x00000200", "masked_24bit_hex": "0x000200", "class": "ROM"},
+    {"index": 2, "name": "bus_error", "table_offset": 8, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 3, "name": "address_error", "table_offset": 12, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 4, "name": "illegal_instruction", "table_offset": 16, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 5, "name": "divide_by_zero", "table_offset": 20, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 6, "name": "chk", "table_offset": 24, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 7, "name": "trapv", "table_offset": 28, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 8, "name": "privilege_violation", "table_offset": 32, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 9, "name": "trace", "table_offset": 36, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 10, "name": "line_1010", "table_offset": 40, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 11, "name": "line_1111", "table_offset": 44, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 12, "name": "reserved_12", "table_offset": 48, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 13, "name": "coprocessor_protocol", "table_offset": 52, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 14, "name": "format_error", "table_offset": 56, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 15, "name": "uninitialized_interrupt", "table_offset": 60, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 16, "name": "reserved_16", "table_offset": 64, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 17, "name": "reserved_17", "table_offset": 68, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 18, "name": "reserved_18", "table_offset": 72, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 19, "name": "reserved_19", "table_offset": 76, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 20, "name": "reserved_20", "table_offset": 80, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 21, "name": "reserved_21", "table_offset": 84, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 22, "name": "reserved_22", "table_offset": 88, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 23, "name": "reserved_23", "table_offset": 92, "value_hex": "0x00000736", "masked_24bit_hex": "0x000736", "class": "ROM"},
+    {"index": 24, "name": "spurious_interrupt", "table_offset": 96, "value_hex": "0x00000738", "masked_24bit_hex": "0x000738", "class": "ROM"},
+    {"index": 25, "name": "level_1_interrupt", "table_offset": 100, "value_hex": "0x0000073A", "masked_24bit_hex": "0x00073A", "class": "ROM"},
+    {"index": 26, "name": "level_2_interrupt", "table_offset": 104, "value_hex": "0x0000073C", "masked_24bit_hex": "0x00073C", "class": "ROM"},
+    {"index": 27, "name": "level_3_interrupt", "table_offset": 108, "value_hex": "0x0000073E", "masked_24bit_hex": "0x00073E", "class": "ROM"},
+    {"index": 28, "name": "level_4_interrupt", "table_offset": 112, "value_hex": "0x00000754", "masked_24bit_hex": "0x000754", "class": "ROM"},
+    {"index": 29, "name": "level_5_interrupt", "table_offset": 116, "value_hex": "0x00000742", "masked_24bit_hex": "0x000742", "class": "ROM"},
+    {"index": 30, "name": "level_6_interrupt", "table_offset": 120, "value_hex": "0x00000940", "masked_24bit_hex": "0x000940", "class": "ROM"},
+    {"index": 31, "name": "level_7_interrupt", "table_offset": 124, "value_hex": "0x00000748", "masked_24bit_hex": "0x000748", "class": "ROM"}
+  ],
+  "tail_graphics_candidate": {
+    "preceding_fill_start": 487586,
+    "preceding_fill_end_exclusive": 509952,
+    "preceding_fill_length": 22366,
+    "start": 509952,
+    "end_exclusive": 524288,
+    "length": 14336,
+    "aligned_32_bytes": true,
+    "raw_4bpp_tile_count": 448,
+    "entropy": 3.779636
+  },
+  "notes": [
+    "Exact gameplay formulas, AI logic, frame timing, palette mapping, metasprites and save field layout remain unresolved.",
+    "The diagnostic tail atlas is private and must not be committed or imported by release code."
+  ]
+}
