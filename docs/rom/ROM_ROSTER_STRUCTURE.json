@@ -1,0 +1,94 @@
+{
+  "schema": "ehrdb-rom-roster-public-structure-v1",
+  "source_sha256": "b13f1e31bf6ba739e4cffd98374263b3421b3a61c4873e30dbc866198736e880",
+  "scope": "Offsets, counts, field widths, hash-only code proofs, and semantic limits. Full names and raw records remain private.",
+  "factory_roster": {
+    "start": 38884,
+    "start_hex": "0x0097E4",
+    "end_exclusive": 40264,
+    "end_exclusive_hex": "0x009D48",
+    "total_bytes": 1380,
+    "record_count": 60,
+    "record_size": 23,
+    "field_widths": {
+      "display_name": 13,
+      "unresolved_metadata": 5,
+      "ratings": 4,
+      "unresolved_final_field": 1
+    }
+  },
+  "created_fighter_dispatch": {
+    "internal_ids": [0, 1, 2, 3],
+    "ram_base_hex": "0xFFF89E",
+    "record_size": 34,
+    "semantic_status": "Runtime dispatch verified; player-facing and persistence meanings unresolved."
+  },
+  "initial_ladder": {
+    "source_start": 40264,
+    "source_start_hex": "0x009D48",
+    "destination_hex": "0xFFF928",
+    "copy_sequence_start_hex": "0x007E26",
+    "copy_bytes": 90,
+    "rank_count": 30,
+    "active_factory_records": 30,
+    "inactive_factory_records": 30,
+    "arrays": [
+      {
+        "name": "internal_fighter_ids",
+        "rom_start_hex": "0x009D48",
+        "ram_start_hex": "0xFFF928",
+        "count": 30
+      },
+      {
+        "name": "wins",
+        "rom_start_hex": "0x009D66",
+        "ram_start_hex": "0xFFF946",
+        "count": 30
+      },
+      {
+        "name": "losses",
+        "rom_start_hex": "0x009D84",
+        "ram_start_hex": "0xFFF964",
+        "count": 30
+      }
+    ]
+  },
+  "proofs": [
+    {
+      "name": "rank_id_dispatch",
+      "offset_hex": "0x00877E",
+      "length": 24,
+      "sha256": "84e3874074139328793fb3f8d5f298f2378e4a4159583e7bb134ce7dd94bca01"
+    },
+    {
+      "name": "factory_record_loader",
+      "offset_hex": "0x0087C2",
+      "length": 22,
+      "sha256": "6d8059abcfb10d9dd91f1c10354988f8a9efad64d8d0a0ed41a67844eccef620"
+    },
+    {
+      "name": "ladder_bootstrap_copy",
+      "offset_hex": "0x007E26",
+      "length": 18,
+      "sha256": "3c97371a91a6dcc6c2f0bd90a70d3af8bf13fbcae5f6eeaf5e18997edef28733"
+    },
+    {
+      "name": "paired_bout_count_use",
+      "offset_hex": "0x0087F0",
+      "length": 22,
+      "sha256": "71a3afb7ef2f49a1c92edea6c56bbe8ec50918a573f64d9f9c33edafd60fc14f"
+    },
+    {
+      "name": "four_rating_transform",
+      "offset_hex": "0x008806",
+      "length": 48,
+      "sha256": "aaff39729c982d124e163b3b55886e72f18776b2836abca4c506cf47f7148166"
+    }
+  ],
+  "semantic_limits": [
+    "The four rating bytes are structurally verified; their Power/Stamina/Speed/Defense order is not yet proven.",
+    "The final three-value field is unresolved.",
+    "The 30 inactive records are verified as inactive at bootstrap; replacement use remains inferred.",
+    "IDs 0-3 use separate RAM records; their exact profile and mode semantics remain unresolved."
+  ]
+}
