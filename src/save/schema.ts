@@ -7,6 +7,7 @@
  */
 import type { CareerState, LegacyRecord } from '@career/types';
 import type { DifficultyId } from '@ai/profiles';
+import { validateCareer, validateLegacy, validateSlots } from './validate';
 
 /** Current top-level save version. Bump whenever the shape changes. */
 export const SAVE_VERSION = 4;
@@ -191,29 +192,56 @@ export function parseSave(raw: string): MigrationResult {
   working.version = SAVE_VERSION;
 
   const merged = normalise(working);
-  return { ok: true, save: merged, migratedFrom: version === SAVE_VERSION ? null : version, notes };
+  if (!merged.ok) return { ok: false, reason: merged.reason, raw };
+  return { ok: true, save: merged.save, migratedFrom: version === SAVE_VERSION ? null : version, notes };
 }
 
-/** Fills in anything a hand-edited or partial save is missing. */
-function normalise(o: Record<string, unknown>): SaveFile {
+/**
+ * Fills in anything a hand-edited or partial save is missing, and validates
+ * everything it cannot fill in.
+ *
+ * Settings are merged over defaults, because a missing option has an obviously
+ * right answer. The career, slots and legacy board are structurally validated
+ * instead (see `./validate`): they used to be cast straight to their types,
+ * which checks nothing at runtime and turned malformed data into a crash three
+ * screens later rather than a readable load failure here.
+ */
+function normalise(o: Record<string, unknown>): { ok: true; save: SaveFile } | { ok: false; reason: string } {
   const base = emptySave();
   const settings = (o.settings ?? {}) as Partial<Settings>;
+
+  let career: CareerState | null = null;
+  if (o.career !== undefined && o.career !== null) {
+    const v = validateCareer(o.career);
+    if (!v.ok) return { ok: false, reason: `save.error.invalidCareer:${v.path}: ${v.reason}` };
+    career = v.value;
+  }
+
+  const slots = validateSlots(o.slots);
+  if (!slots.ok) return { ok: false, reason: `save.error.invalidSlot:${slots.path}: ${slots.reason}` };
+
+  const legacy = validateLegacy(o.legacy);
+  if (!legacy.ok) return { ok: false, reason: `save.error.invalidLegacy:${legacy.path}: ${legacy.reason}` };
+
   return {
-    magic: SAVE_MAGIC,
-    version: SAVE_VERSION,
-    savedAt: typeof o.savedAt === 'string' ? o.savedAt : '',
-    settings: {
-      audio: { ...base.settings.audio, ...(settings.audio ?? {}) },
-      accessibility: { ...base.settings.accessibility, ...(settings.accessibility ?? {}) },
-      difficulty: settings.difficulty ?? base.settings.difficulty,
-      keyboard: { ...(settings.keyboard ?? {}) },
-      gamepad: { ...(settings.gamepad ?? {}) },
-      seenTutorial: settings.seenTutorial ?? false,
+    ok: true,
+    save: {
+      magic: SAVE_MAGIC,
+      version: SAVE_VERSION,
+      savedAt: typeof o.savedAt === 'string' ? o.savedAt : '',
+      settings: {
+        audio: { ...base.settings.audio, ...(settings.audio ?? {}) },
+        accessibility: { ...base.settings.accessibility, ...(settings.accessibility ?? {}) },
+        difficulty: settings.difficulty ?? base.settings.difficulty,
+        keyboard: { ...(settings.keyboard ?? {}) },
+        gamepad: { ...(settings.gamepad ?? {}) },
+        seenTutorial: settings.seenTutorial ?? false,
+      },
+      career,
+      slots: slots.value,
+      legacy: legacy.value,
+      ...(o.quarantine ? { quarantine: o.quarantine as { reason: string; raw: string } } : {}),
     },
-    career: (o.career as CareerState | null) ?? null,
-    slots: (o.slots as Record<string, CareerState>) ?? {},
-    legacy: Array.isArray(o.legacy) ? (o.legacy as LegacyRecord[]) : [],
-    ...(o.quarantine ? { quarantine: o.quarantine as { reason: string; raw: string } } : {}),
   };
 }
 

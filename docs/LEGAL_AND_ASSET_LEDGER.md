@@ -36,14 +36,25 @@ during research, and takes no expression from it.
 | All player-facing text | `src/ui/strings.ts` | This project | Project licence | 2026-08-01 | Unrestricted | Final |
 | Typography | System monospace stack (`ui-monospace`, DejaVu Sans Mono, Menlo, Consolas) | Operating system | Not redistributed | n/a | Referenced by name only | Final — no font file is bundled |
 | Phaser 3 | npm `phaser@3.90.0` | Phaser Studio | MIT | 2026-08-01 | Redistribution permitted | Final |
+| QA screenshots (85 PNG, `artifacts/qa/screens/`) | Captured by `npm run qa:screens` from this project's own renderer | This project | Project licence | 2026-08-02 | Unrestricted | Final — evidence only, never copied into `dist/` |
 
-**There are zero binary media files in this repository and zero in the
-production bundle.** Every pixel is drawn by code at runtime and every sound is
-synthesised at runtime. This is the reason the provenance table above is short
-and complete: there is nothing to trace.
+**There are zero binary media files in the production bundle.** Every pixel is
+drawn by code at runtime and every sound is synthesised at runtime. This is the
+reason the provenance table above is short and complete: nothing ships that
+needs tracing.
+
+The repository is a different matter, and an earlier version of this paragraph
+claimed otherwise. It tracks **85 PNG files**, all of them QA screenshots under
+`artifacts/qa/screens/` — output of `npm run qa:screens`, committed as visual
+evidence. They are produced by this project from this project's own rendering
+code, they are covered by the "generated at runtime" rows above, and Vite never
+copies them into `dist/`. But they are binary media in the repository, and a
+ledger whose entire purpose is provenance accuracy does not get to round that
+down to zero.
 
 Verified by `npm run release:audit`, which reports the binary-media count in
-`dist/` (currently 0).
+`dist/` (currently 0) and fails the build if that number rises without a
+matching row in the table above.
 
 ## Build-time dependencies
 

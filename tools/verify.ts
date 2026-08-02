@@ -28,6 +28,10 @@ const STAGES: Stage[] = [
   { name: 'release-audit', command: 'npx', args: ['tsx', 'tools/release-audit.ts'], required: true, description: 'legal and provenance audit of source and bundle' },
   { name: 'soak', command: 'npx', args: ['tsx', 'tools/soak.ts', '--bouts', '200', '--json', 'artifacts/qa/soak.json'], required: true, description: '200 seeded AI-versus-AI bouts' },
   { name: 'soak-mirror', command: 'npx', args: ['tsx', 'tools/soak.ts', '--mirror', '--bouts', '200', '--json', 'artifacts/qa/soak-mirror.json'], required: true, description: '200 control bouts, ratings held equal' },
+  // The balance claim itself, at the sample size where the claim is testable.
+  // The 200-bout batch above is for iteration; its sampling error is wider
+  // than half the documented band, so it cannot certify anything.
+  { name: 'balance-certify', command: 'npx', args: ['tsx', 'tools/soak.ts', '--certify', '--seed', '63000', '--json', 'artifacts/qa/balance-certify.json'], required: true, description: 'documented balance targets, 1200 control bouts' },
   { name: 'career-sim', command: 'npx', args: ['tsx', 'tools/career-sim.ts', '--careers', '12', '--json', 'artifacts/qa/career.json'], required: true, description: '12 complete careers played through the real simulation' },
   { name: 'smoke', command: 'npx', args: ['tsx', 'tools/qa-smoke.ts'], required: true, description: 'browser end-to-end: menu, bout, result, save, reload' },
 ];

@@ -1124,17 +1124,43 @@ export class BoutSim {
    * determinism tests assert exactly that.
    */
   hashState(): string {
+    const rng = this.rng.save();
     const parts: (number | string)[] = [
       this.state.phase,
       this.state.round,
       this.state.roundTick,
+      this.state.totalTicks,
       this.state.phaseTicks,
       this.state.groundedCorner ?? -1,
       quantize(this.state.refereeConcern[0]),
       quantize(this.state.refereeConcern[1]),
+      // The random stream's position is part of the future, not the past: two
+      // states that differ only here are identical to look at and diverge on
+      // the very next draw. Omitting it made the hash a description of the
+      // present rather than a prediction of what follows.
+      rng.a,
+      rng.b,
+      rng.c,
+      rng.d,
+      // Simulation-owned timers that no fighter field carries.
+      this.started ? 1 : 0,
+      this.clinchCooldown,
+      this.clinchTimer,
+      this.ropeCue[0],
+      this.ropeCue[1],
+      // The round in progress. Accrued score decides a bout that goes the
+      // distance, so it influences the outcome as surely as composure does.
+      this.currentScore.round,
+      ...(['clean', 'aggression', 'ringControl', 'defense', 'knockdowns'] as const).flatMap((k) => [
+        quantize(this.currentScore[k][0]),
+        quantize(this.currentScore[k][1]),
+      ]),
+      this.state.scores.length,
     ];
     for (const f of this.state.fighters) {
       parts.push(
+        f.id,
+        f.corner,
         f.state,
         f.stateTicks,
         f.commitTicks,
@@ -1148,6 +1174,7 @@ export class BoutSim {
         f.facing,
         quantize(f.composure),
         quantize(f.resilience),
+        quantize(f.resilienceMax),
         quantize(f.headTrauma),
         quantize(f.bodyTrauma),
         quantize(f.exertion),
@@ -1162,8 +1189,18 @@ export class BoutSim {
         f.punchesThrown,
         f.punchesLanded,
         f.punchesBlocked,
+        f.headLanded,
+        f.bodyLanded,
         f.chainHits,
+        // Timers the referee, the AI and the stalling rules all read.
+        f.idleTicks,
+        f.clinchTicks,
+        f.ropeTicks,
+        // The whole buffer, not just its punch: level and age decide whether
+        // the buffered punch fires at all, and as what.
         f.bufferedPunch ?? '-',
+        f.bufferedLevel,
+        f.bufferedAge,
       );
     }
     const s = parts.join('|');

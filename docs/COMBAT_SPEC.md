@@ -131,12 +131,26 @@ point. A shutout round without a knockdown can still be a 10-8.
 
 ## Balance evidence
 
-From `npm run soak -- --mirror --bouts 200` (identical ratings, archetype the
-only variable — the only honest way to measure strategy):
+Win rates come from `npm run balance:certify` — 1200 control bouts, identical
+ratings, archetype the only variable (the only honest way to measure strategy).
+The other figures are descriptive, from the 200-bout iteration run.
 
-- Win rates: 40–60% across all five archetypes.
-- Accuracy: ~35% of punches thrown land cleanly.
-- Outcomes: ~32% KO, ~3% TKO, ~57% decision, ~8% draw.
-- Mean bout length: 5.2 of a scheduled 6.3 rounds.
+The sample size is part of the claim. At 200 bouts each archetype contests 80,
+a standard error near 5.6%, so the 95% interval is about ±11% — wider than the
+band. An earlier version of this section cited the 200-bout run as evidence for
+the band, which it never had the resolution to support.
+
+Enforced targets, defined once in `tools/balance-targets.ts`:
+
+- Win rates: 40%–60% across all five archetypes, over 1200 mirror bouts.
+- Accuracy: 30%–40% of punches thrown land cleanly.
+- Stoppages: 30%–45% of bouts end inside the distance.
+- Mean bout length: 4.4–5.6 of a scheduled 6.3 rounds.
+
+Descriptive, from the same runs — no gate asserts these:
+
+- Outcomes split roughly one third stoppage, the rest on the cards, ~8% draws.
+- Individual matchup cells are lopsided; a single cell carries too few bouts to
+  distinguish a real style advantage from sampling noise.
 - Punch mixes, head/body splits, guard usage and preferred ranges all differ
   measurably by archetype (asserted in `tests/ai/fairness.test.ts`).

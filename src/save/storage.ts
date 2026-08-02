@@ -109,7 +109,8 @@ export class SaveStore {
    * Writes the current save. The payload is re-parsed before it is committed,
    * so a bug that produces unreadable data fails here rather than on next load.
    */
-  write(timestamp: string): boolean {
+  write(timestamp: string, options: { rollBackup?: boolean } = {}): boolean {
+    const rollBackup = options.rollBackup ?? true;
     const text = serialiseSave(this.cache, timestamp);
     const check = parseSave(text);
     if (!check.ok) {
@@ -117,9 +118,13 @@ export class SaveStore {
       return false;
     }
     try {
-      // Roll the previous good save into the backup slot first.
-      const previous = this.storage.getItem(KEY);
-      if (previous !== null) this.storage.setItem(BACKUP_KEY, previous);
+      // Roll the previous good save into the backup slot first — except when
+      // the caller is deliberately erasing, where preserving the old data is
+      // the opposite of what was asked for.
+      if (rollBackup) {
+        const previous = this.storage.getItem(KEY);
+        if (previous !== null) this.storage.setItem(BACKUP_KEY, previous);
+      }
       this.storage.setItem(KEY, text);
       return true;
     } catch (err) {
@@ -141,11 +146,21 @@ export class SaveStore {
     return serialiseSave(this.cache, timestamp);
   }
 
-  /** Wipes everything. Used by the settings reset, behind a confirmation. */
+  /**
+   * Wipes everything. Used by the settings reset, behind a confirmation.
+   *
+   * The rolling backup has to be suppressed, not merely cleared beforehand:
+   * an ordinary write copies the outgoing save into the backup slot, so a
+   * reset that went through the normal path would clear the backup and then
+   * immediately refill it with the very career the player asked to destroy —
+   * which the next corrupt-save recovery would then cheerfully restore.
+   */
   reset(timestamp: string): void {
     this.cache = emptySave();
+    this.storage.removeItem(KEY);
     this.storage.removeItem(BACKUP_KEY);
-    this.write(timestamp);
+    this.lastReport = { save: this.cache, recovered: false, migratedFrom: null, messageKey: null };
+    this.write(timestamp, { rollBackup: false });
   }
 
   clearQuarantine(timestamp: string): void {

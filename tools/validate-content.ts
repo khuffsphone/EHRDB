@@ -19,6 +19,7 @@ import { resolvePose } from '../src/art/boxer';
 import { TRAINING_CATALOGUE_IDS } from '../src/career/training';
 import { STYLE_BASES } from '../src/career/creation';
 import { PUNCH_IDS, type ActionState, type TargetLevel } from '../src/sim/types';
+import { documentedClaims } from './balance-targets';
 
 const problems: string[] = [];
 const notes: string[] = [];
@@ -120,6 +121,32 @@ if (existsSync(LEDGER)) {
   const ledger = readFileSync(LEDGER, 'utf8');
   check(/BUILD_PROFILE\s*[:|]\s*\**SAFE_RELEASE/.test(ledger), `${LEDGER} does not record the active build profile`);
 }
+
+// --- Documented balance claims match the enforced targets -------------------
+//
+// The failure this exists to prevent: prose claiming a 40–60% archetype band
+// while the gate asserted 20–80%, for the whole project, with nothing failing.
+// Every quantitative balance claim in the documentation is now generated from
+// tools/balance-targets.ts, and this check fails the build if the two disagree
+// — so a target cannot be widened without the sentence changing to match, and
+// a sentence cannot be written that no test enforces.
+
+const BALANCE_DOCS = ['CLAUDE.md', 'docs/PRODUCT_CANON.md', 'docs/COMBAT_SPEC.md'];
+for (const doc of BALANCE_DOCS) {
+  if (!existsSync(doc)) {
+    check(false, `${doc} is missing — the balance targets have nowhere to be stated`);
+    continue;
+  }
+  const text = readFileSync(doc, 'utf8');
+  for (const claim of documentedClaims()) {
+    check(
+      text.includes(claim.text),
+      `${doc} does not state the enforced ${claim.label} ("${claim.text}") — ` +
+        `documentation and tools/balance-targets.ts have drifted apart`,
+    );
+  }
+}
+notes.push(`balance claims in ${BALANCE_DOCS.join(', ')} match tools/balance-targets.ts`);
 
 // --- Report -----------------------------------------------------------------
 

@@ -22,6 +22,7 @@ import {
 import { BoutScene } from '@scenes/BoutScene';
 import { SettingsScene, ControlsScene } from '@scenes/SettingsScenes';
 import { ExhibitionScene, LabScene } from '@scenes/PracticeScenes';
+import { BUILD, type BuildInfo } from '@util/build-info';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -71,7 +72,14 @@ const config: Phaser.Types.Core.GameConfig = {
 // Exposed for the browser smoke test to drive the game deterministically.
 declare global {
   interface Window {
-    __TEN_COUNT__?: { game: Phaser.Game; errors: string[]; activeScenes(): string[]; focusLabel(): string | null };
+    __TEN_COUNT__?: {
+      game: Phaser.Game;
+      errors: string[];
+      activeScenes(): string[];
+      focusLabel(): string | null;
+      /** Which source produced this bundle. See src/util/build-info.ts. */
+      build: BuildInfo;
+    };
   }
 }
 
@@ -87,4 +95,9 @@ window.__TEN_COUNT__ = {
   // drives the game, which is still driven entirely by real input events.
   activeScenes: () => game.scene.getScenes(true).map((s) => s.scene.key),
   focusLabel: () => debugFocusedLabel(),
+  // The full build identity, reachable from the console and from the QA
+  // harness. A bug report can name the exact bytes it came from, and the
+  // release audit can confirm the shipped bundle agrees with the manifest
+  // written beside it.
+  build: BUILD,
 };

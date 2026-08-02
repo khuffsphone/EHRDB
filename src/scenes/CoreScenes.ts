@@ -9,6 +9,7 @@ import { UI } from '@art/palettes';
 import { drawBoxer, POSES } from '@art/boxer';
 import { money, record, t } from '@ui/strings';
 import { CAREER_RULES } from '@career/types';
+import { buildLabel } from '@util/build-info';
 import type { InputSnapshot } from '@input/manager';
 
 /** Creates shared services and hands off to the title. */
@@ -76,6 +77,13 @@ export class TitleScene extends BaseScene {
       colour: UI.textDim,
       align: 'center',
     });
+    // Build identity, so a player reporting a bug and a developer reproducing
+    // it are provably talking about the same bytes.
+    label(this, VIEW.width - 6, VIEW.height - 10, buildLabel(), {
+      size: 6,
+      colour: UI.textDim,
+      align: 'right',
+    }).setOrigin(1, 0);
     this.cameras.main.fadeIn(300, 0, 0, 0);
   }
 

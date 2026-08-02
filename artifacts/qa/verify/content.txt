@@ -1,5 +1,6 @@
 $ npx tsx tools/validate-content.ts
 
   · 19 fighter states x 7 punches x 2 levels resolved to finite poses
+  · balance claims in CLAUDE.md, docs/PRODUCT_CANON.md, docs/COMBAT_SPEC.md match tools/balance-targets.ts
   · 8 fighters, 3 venues, 12 moves, 344 strings validated
 content validation passed

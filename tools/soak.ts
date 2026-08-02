@@ -18,6 +18,7 @@ import { makeRuleset } from '../src/data/rulesets';
 import { VENUES } from '../src/data/venues';
 import { DIFFICULTIES, type DifficultyId } from '../src/ai/profiles';
 import { simulateAiBout } from '../src/sim/runner';
+import { BALANCE_TARGETS } from './balance-targets';
 import type { ArchetypeId, PunchId } from '../src/sim/types';
 
 interface Args {
@@ -27,18 +28,74 @@ interface Args {
   seed: number;
   /** Use identical-ratings control fighters so only the archetype differs. */
   mirror: boolean;
+  /**
+   * Assert the documented balance targets and exit non-zero on any miss.
+   * Implies `--mirror` and raises the sample to `BALANCE_TARGETS.certifySize`,
+   * because the documented band is narrower than the sampling error of a
+   * smaller batch and asserting it there would measure the seed.
+   */
+  certify?: boolean;
 }
 
 function parseArgs(argv: string[]): Args {
-  const out: Args = { bouts: 120, json: null, difficulty: 'contender', seed: 1000, mirror: false };
+  const out: Args = { bouts: 120, json: null, difficulty: 'contender', seed: 1000, mirror: false, certify: false };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--bouts') out.bouts = Number(argv[++i]);
     else if (argv[i] === '--json') out.json = argv[++i];
     else if (argv[i] === '--difficulty') out.difficulty = argv[++i] as DifficultyId;
     else if (argv[i] === '--seed') out.seed = Number(argv[++i]);
     else if (argv[i] === '--mirror') out.mirror = true;
+    else if (argv[i] === '--certify') {
+      out.certify = true;
+      out.mirror = true;
+    }
   }
+  if (out.certify && out.bouts < BALANCE_TARGETS.certifySize) out.bouts = BALANCE_TARGETS.certifySize;
   return out;
+}
+
+/**
+ * Checks a report against the documented targets.
+ *
+ * Returns the failures rather than printing them, so the caller decides
+ * whether a miss is fatal. Every number comes from `BALANCE_TARGETS`; there
+ * are no literals here, which is the point.
+ */
+export function certify(r: SoakReport): string[] {
+  const t = BALANCE_TARGETS;
+  const misses: string[] = [];
+  const band = (label: string, value: number, min: number, max: number, show = pctOf(value)): void => {
+    if (value < min || value > max) {
+      misses.push(`${label} ${show} is outside the documented ${pctOf(min)}–${pctOf(max)}`);
+    }
+  };
+
+  for (const a of r.archetypes) {
+    band(
+      `${a.archetype} win rate`,
+      a.wins / Math.max(1, a.bouts),
+      t.archetypeWinRate.min,
+      t.archetypeWinRate.max,
+      `${((a.wins / Math.max(1, a.bouts)) * 100).toFixed(1)}% (${a.wins}/${a.bouts})`,
+    );
+  }
+  band('accuracy', r.meanLandPercent / 100, t.accuracy.min, t.accuracy.max, `${r.meanLandPercent.toFixed(1)}%`);
+  band(
+    'stoppage rate',
+    (r.outcomes.ko + r.outcomes.tko) / Math.max(1, r.bouts),
+    t.stoppageRate.min,
+    t.stoppageRate.max,
+  );
+  if (r.meanRounds < t.meanRounds.min || r.meanRounds > t.meanRounds.max) {
+    misses.push(
+      `mean rounds ${r.meanRounds.toFixed(2)} is outside the documented ${t.meanRounds.min}–${t.meanRounds.max}`,
+    );
+  }
+  return misses;
+}
+
+function pctOf(v: number): string {
+  return `${(v * 100).toFixed(1)}%`;
 }
 
 export interface ArchetypeStats {
@@ -283,7 +340,20 @@ function main(): void {
     console.log(`\n  wrote ${args.json}`);
   }
 
-  process.exit(r.failures.length > 0 ? 1 : 0);
+  let certified = true;
+  if (args.certify) {
+    const misses = certify(r);
+    console.log(`\n  CERTIFICATION against docs/PRODUCT_CANON.md, ${r.bouts} control bouts`);
+    if (misses.length === 0) {
+      console.log('  every documented balance target met.');
+    } else {
+      certified = false;
+      console.error(`  ${misses.length} target(s) missed:`);
+      for (const m of misses) console.error(`    - ${m}`);
+    }
+  }
+
+  process.exit(r.failures.length > 0 || !certified ? 1 : 0);
 }
 
 if (process.argv[1] && process.argv[1].includes('soak')) main();

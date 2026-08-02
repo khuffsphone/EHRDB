@@ -59,7 +59,7 @@ export const AI_PROFILES: Record<ArchetypeId, AiProfile> = {
     archetype: 'out_boxer',
     targetRange: 46,
     rangeTolerance: 9,
-    aggression: 0.52,
+    aggression: 0.55,
     riskTolerance: 0.2,
     bodyBias: 0.16,
     counterAppetite: 0.45,
@@ -69,7 +69,7 @@ export const AI_PROFILES: Record<ArchetypeId, AiProfile> = {
     // An out-boxer wins by throwing the most punches, not the fewest. The jab
     // is weighted well above every other option so the profile actually
     // produces the high-volume long-range game it is meant to.
-    punchWeights: W(1.3, 0.62, 0.26, 0.09, 0.13, 0.06),
+    punchWeights: W(1.2, 0.64, 0.26, 0.09, 0.13, 0.06),
     movementHold: 16,
   },
 
@@ -77,16 +77,25 @@ export const AI_PROFILES: Record<ArchetypeId, AiProfile> = {
   // volume and accepts being hit to get there.
   pressure: {
     archetype: 'pressure',
-    targetRange: 27,
+    /*
+     * Just outside the clinch, not inside it. A target of 27 sat one unit off
+     * `RANGE.clinch`, so the archetype meant to throw the most punches threw
+     * the fewest: it spent the round tied up, and its straight punches were
+     * gated out by range while hooks and uppercuts carried 69% of the mix.
+     * Backing off four units restores the volume the identity depends on.
+     */
+    targetRange: 29,
     rangeTolerance: 7,
     aggression: 0.9,
     riskTolerance: 0.62,
     bodyBias: 0.52,
     counterAppetite: 0.24,
-    guardDiscipline: 0.28,
+    // Walking through punches is the identity; being unable to survive doing
+    // it is not. This is still the least disciplined guard of the five.
+    guardDiscipline: 0.3,
     slipPreference: 0.3,
     clinchAppetite: 0.2,
-    punchWeights: W(0.6, 0.4, 0.9, 0.62, 0.7, 0.4),
+    punchWeights: W(0.72, 0.6, 0.9, 0.62, 0.62, 0.4),
     movementHold: 10,
   },
 
@@ -98,14 +107,14 @@ export const AI_PROFILES: Record<ArchetypeId, AiProfile> = {
     // the lead has to be committed before it arrives.
     targetRange: 42,
     rangeTolerance: 8,
-    aggression: 0.34,
-    riskTolerance: 0.34,
+    aggression: 0.38,
+    riskTolerance: 0.42,
     bodyBias: 0.3,
     counterAppetite: 0.95,
     guardDiscipline: 0.78,
     slipPreference: 0.55,
     clinchAppetite: 0.4,
-    punchWeights: W(0.7, 0.95, 0.5, 0.42, 0.5, 0.42),
+    punchWeights: W(0.7, 0.98, 0.5, 0.55, 0.5, 0.55),
     movementHold: 18,
   },
 
@@ -113,32 +122,76 @@ export const AI_PROFILES: Record<ArchetypeId, AiProfile> = {
   // late, which is the counterplay.
   brawler: {
     archetype: 'brawler',
-    targetRange: 33,
+    /*
+     * Two units further out than the pocket it used to sit in. Its heavy
+     * punches are its identity and also the shortest-reach punches in the
+     * game, so distance is the honest lever: it lands fewer of them without
+     * throwing fewer of them. Paying for the power in volume alone left it
+     * beating the boxer-puncher badly enough to push that archetype under the
+     * band.
+     */
+    targetRange: 35,
     rangeTolerance: 9,
-    aggression: 0.66,
-    riskTolerance: 0.78,
+    aggression: 0.56,
+    riskTolerance: 0.6,
     bodyBias: 0.22,
     counterAppetite: 0.35,
-    guardDiscipline: 0.3,
-    slipPreference: 0.15,
-    clinchAppetite: 0.3,
-    punchWeights: W(0.75, 0.85, 0.85, 0.95, 0.6, 0.85),
+    guardDiscipline: 0.22,
+    slipPreference: 0.1,
+    clinchAppetite: 0.22,
+    /*
+     * The heaviest mix in the game, and it has to stay that way.
+     *
+     * The brawler was the dominant archetype at 59% and won 94% of its bouts
+     * by stoppage. The first fix was to trade rear-hand weight for the jab,
+     * which balanced it beautifully and was wrong: its power-punch share fell
+     * from 31% to 10%, and `tests/ai/fairness.test.ts` failed on exactly that.
+     * Balance had been bought by deleting the archetype's identity — the same
+     * mistake as making every fighter identical and calling the result fair.
+     *
+     * So the power mix is restored and the cost is paid in `aggression`
+     * instead: the brawler throws the fewest punches of the five and each one
+     * matters. Low volume, high consequence, no defence to speak of — patient
+     * in a lazy way, then commits everything, and fades. That is the design,
+     * and now it is also the measurement.
+     */
+    punchWeights: W(0.55, 0.7, 0.7, 0.95, 0.45, 0.75),
     movementHold: 14,
   },
 
   // Wins by having no hole. Shifts range and mix between rounds.
   boxer_puncher: {
     archetype: 'boxer_puncher',
-    targetRange: 38,
+    /*
+     * Just outside the pocket rather than inside it. At 38 it sat squarely in
+     * RANGE.pocket, took the most punishment in the game, and had neither the
+     * out-boxer's escape nor the brawler's power to make the exchange worth
+     * it — the weakest archetype by a distance, with the worst accuracy of the
+     * five because much of its volume was thrown from the wrong distance for
+     * its own mix. "No hole" has to mean it picks its range, not that it
+     * stands in everyone else's.
+     */
+    targetRange: 39,
     rangeTolerance: 8,
-    aggression: 0.52,
-    riskTolerance: 0.5,
+    aggression: 0.58,
+    // It is a *puncher*. It previously carried the lightest rear hand of
+    // anyone but the out-boxer, which is not what the name promises.
+    riskTolerance: 0.58,
     bodyBias: 0.38,
-    counterAppetite: 0.6,
-    guardDiscipline: 0.58,
-    slipPreference: 0.42,
+    counterAppetite: 0.7,
+    guardDiscipline: 0.72,
+    // Slipping beats a committed power punch; blocking only softens it. This
+    // is the boxer-puncher's answer to the brawler.
+    slipPreference: 0.55,
     clinchAppetite: 0.35,
-    punchWeights: W(0.85, 0.75, 0.6, 0.45, 0.55, 0.45),
+    /*
+     * Weighted toward the two punches that reach from its own range. Four of
+     * six weights previously favoured short-reach power punches thrown from
+     * 39 units, which is why it carried the worst accuracy of the five while
+     * throwing the most punches. It keeps a real rear hand — it is a puncher —
+     * but it now leads with what actually lands from where it chooses to stand.
+     */
+    punchWeights: W(0.95, 0.9, 0.62, 0.58, 0.5, 0.55),
     movementHold: 16,
   },
 };

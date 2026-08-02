@@ -19,6 +19,14 @@ all with `npm run verify`.
 | 12 | No TODO, FIXME, stub, mocked result or "coming soon" on a production path | `npm run release:audit` | PASS |
 | 13 | Production build runs with zero uncaught exceptions and zero console errors through menu → bout → result → save → reload | `npm run qa:smoke` | PASS |
 | 14 | All release assets have known provenance; no original-game or ROM-derived content ships | `npm run release:audit` + `docs/LEGAL_AND_ASSET_LEDGER.md` | PASS |
+| 15 | The documented balance targets hold at a sample size that can support them | `npm run balance:certify` (1200 control bouts, verify stage `balance-certify`) | PASS |
+| 16 | Every quantitative claim in the documents is enforced; prose cannot drift from the gate | `tools/balance-targets.ts` + `npm run assets:validate` | PASS |
+| 17 | The simulation reproduces hashes committed in a previous commit, not just its own rerun | `tests/sim/replay.test.ts` + `tests/fixtures/replay.json` | PASS |
+| 18 | The state hash covers every field that can influence a future tick | `tests/sim/replay.test.ts` — perturbs every `FighterState` field in turn | PASS |
+| 19 | An input edge reaches the simulation exactly once regardless of frame stalls | `tests/input/edges.test.ts` | PASS |
+| 20 | Structurally malformed saves fail at load with a path, not at a screen with a crash | `tests/save/validate.test.ts` | PASS |
+| 21 | Every gate runs on a clean machine, not only locally | `.github/workflows/verify.yml` | PASS |
+| 22 | A release artifact can be traced to the commit and dependency set that produced it | `dist/build-manifest.json` + `npm run release:audit` | PASS |
 
 ## Browser and human-visible gates
 
@@ -53,5 +61,14 @@ Recorded honestly rather than downgraded gates:
 2. **Draw rate is ~8%**, higher than real boxing's 2–4%. See D-017.
 3. **Art is geometric rather than painterly** — a direct consequence of
    generating every pixel from code to keep provenance complete (D-016).
-4. **Counterpuncher versus out-boxer** remains the one lopsided matchup cell in
-   the control soak; every archetype's overall win rate is inside 40–60%.
+4. **Individual matchup cells remain lopsided** in the control soak even when
+   every archetype's overall win rate is inside the band. This is partly real —
+   styles do match up badly against each other, and a rock-paper-scissors
+   element is desirable — and partly sampling: a single cell of the matrix
+   carries far too few bouts to distinguish the two. The overall band is
+   certified; the matrix is descriptive only, and no gate asserts it.
+5. **The balance band is certified at 1200 mirror bouts, not at 200.** An
+   earlier version of this document cited the 200-bout run as proof of a
+   40–60% band whose sampling error at that size is about ±11% per archetype.
+   `npm run balance:certify` is now the claim's only evidence; the 200-bout
+   stage checks a deliberately widened range and proves nothing narrower.

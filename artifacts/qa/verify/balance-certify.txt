@@ -1,0 +1,38 @@
+$ npx tsx tools/soak.ts --certify --seed 63000 --json artifacts/qa/balance-certify.json
+
+
+AI SOAK — 1200 bouts at difficulty "contender" [MIRROR: identical ratings, archetype only] (91.8s)
+
+  outcomes      KO 499  TKO 16  decision 632  draw 53
+  mean rounds   4.8
+  mean length   7.8 min of simulated time
+  mean accuracy 36.1%
+
+  archetype           win%   KO%   thrown  land%  head/body   KD+  KD-
+  boxer_puncher      41.9%  14.9%     385  29.7%     90/10   27  166
+  brawler            56.7%  97.1%     185  33.7%      98/2  278   53
+  counterpuncher     43.5%  19.1%     266  39.9%      95/5   40  104
+  out_boxer          46.9%   4.4%     366  32.9%      98/2    1   67
+  pressure           50.0%  71.3%     235  34.8%     68/32  190  146
+
+  archetype matchup matrix (row wins vs column, as row corner)
+                   boxer_pu   brawler  counterp  out_boxe  pressure
+  boxer_puncher           -   42%(60)   63%(60)   43%(60)   28%(60)
+  brawler           63%(60)         -   40%(60)   55%(60)   63%(60)
+  counterpuncher    32%(60)   50%(60)         -   57%(60)   43%(60)
+  out_boxer         55%(60)   43%(60)   50%(60)         -   57%(60)
+  pressure          75%(60)   28%(60)   65%(60)   35%(60)         -
+
+  punch mix (share of punches thrown, per archetype)
+  boxer_puncher     jab:42%  cross:40%  lead_hook:13%  rear_hook:3%  lead_upper:1%  rear_upper:1%
+  brawler           jab:20%  cross:26%  lead_hook:23%  rear_hook:26%  lead_upper:0%  rear_upper:5%
+  counterpuncher    jab:34%  cross:46%  lead_hook:11%  rear_hook:6%  lead_upper:2%  rear_upper:1%
+  out_boxer         jab:63%  cross:26%  lead_hook:9%  rear_hook:2%  lead_upper:0%  rear_upper:0%
+  pressure          jab:27%  cross:12%  lead_hook:40%  rear_hook:8%  lead_upper:13%  rear_upper:1%
+
+  no deadlocks, NaN, invalid transitions or impossible results.
+
+  wrote artifacts/qa/balance-certify.json
+
+  CERTIFICATION against docs/PRODUCT_CANON.md, 1200 control bouts
+  every documented balance target met.

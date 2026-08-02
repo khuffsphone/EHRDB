@@ -2,91 +2,91 @@
   "bouts": 200,
   "difficulty": "contender",
   "outcomes": {
-    "ko": 64,
-    "tko": 6,
-    "decision": 115,
-    "draw": 15
+    "ko": 80,
+    "tko": 1,
+    "decision": 108,
+    "draw": 11
   },
-  "meanRounds": 5.16,
-  "meanTicks": 30326,
-  "meanLandPercent": 35.4,
+  "meanRounds": 4.75,
+  "meanTicks": 27737,
+  "meanLandPercent": 35.8,
   "archetypes": [
     {
       "archetype": "boxer_puncher",
       "bouts": 80,
-      "wins": 34,
-      "kos": 3,
-      "thrown": 28547,
-      "landed": 9081,
-      "headLanded": 8090,
-      "bodyLanded": 991,
-      "knockdownsFor": 1,
-      "knockdownsAgainst": 20,
+      "wins": 33,
+      "kos": 2,
+      "thrown": 30125,
+      "landed": 8541,
+      "headLanded": 7785,
+      "bodyLanded": 756,
+      "knockdownsFor": 2,
+      "knockdownsAgainst": 28,
       "punchMix": {
-        "jab": 11846,
-        "cross": 9134,
-        "lead_hook": 5672,
-        "rear_hook": 683,
-        "lead_upper": 778,
-        "rear_upper": 434
+        "jab": 12782,
+        "cross": 12184,
+        "lead_hook": 3884,
+        "rear_hook": 894,
+        "lead_upper": 165,
+        "rear_upper": 216
       }
     },
     {
       "archetype": "brawler",
       "bouts": 80,
-      "wins": 48,
-      "kos": 45,
-      "thrown": 23012,
-      "landed": 7558,
-      "headLanded": 7482,
-      "bodyLanded": 76,
-      "knockdownsFor": 49,
-      "knockdownsAgainst": 9,
+      "wins": 45,
+      "kos": 42,
+      "thrown": 14483,
+      "landed": 4512,
+      "headLanded": 4414,
+      "bodyLanded": 98,
+      "knockdownsFor": 45,
+      "knockdownsAgainst": 7,
       "punchMix": {
-        "jab": 4192,
-        "cross": 5920,
-        "lead_hook": 5249,
-        "rear_hook": 4680,
-        "lead_upper": 420,
-        "rear_upper": 2551
+        "jab": 2959,
+        "cross": 3736,
+        "lead_hook": 3358,
+        "rear_hook": 3730,
+        "lead_upper": 11,
+        "rear_upper": 689
       }
     },
     {
       "archetype": "counterpuncher",
       "bouts": 80,
-      "wins": 39,
+      "wins": 36,
       "kos": 4,
-      "thrown": 21896,
-      "landed": 8652,
-      "headLanded": 8150,
-      "bodyLanded": 502,
-      "knockdownsFor": 1,
-      "knockdownsAgainst": 10,
+      "thrown": 20564,
+      "landed": 8107,
+      "headLanded": 7669,
+      "bodyLanded": 438,
+      "knockdownsFor": 4,
+      "knockdownsAgainst": 20,
       "punchMix": {
-        "jab": 7432,
-        "cross": 9903,
-        "lead_hook": 2546,
-        "rear_hook": 943,
-        "lead_upper": 864,
-        "rear_upper": 208
+        "jab": 7058,
+        "cross": 9457,
+        "lead_hook": 2112,
+        "rear_hook": 1200,
+        "lead_upper": 442,
+        "rear_upper": 295
       }
     },
     {
       "archetype": "out_boxer",
       "bouts": 80,
-      "wins": 36,
+      "wins": 34,
       "kos": 1,
-      "thrown": 27895,
-      "landed": 9335,
-      "headLanded": 9081,
-      "bodyLanded": 254,
+      "thrown": 30023,
+      "landed": 9389,
+      "headLanded": 9149,
+      "bodyLanded": 240,
       "knockdownsFor": 0,
-      "knockdownsAgainst": 13,
+      "knockdownsAgainst": 10,
       "punchMix": {
-        "jab": 19232,
-        "cross": 5622,
-        "lead_hook": 2718,
-        "rear_hook": 322,
+        "jab": 18963,
+        "cross": 7645,
+        "lead_hook": 2871,
+        "rear_hook": 543,
         "lead_upper": 0,
         "rear_upper": 1
       }
@@ -94,40 +94,40 @@
     {
       "archetype": "pressure",
       "bouts": 80,
-      "wins": 28,
-      "kos": 17,
-      "thrown": 18161,
-      "landed": 6176,
-      "headLanded": 3429,
-      "bodyLanded": 2747,
-      "knockdownsFor": 20,
+      "wins": 41,
+      "kos": 32,
+      "thrown": 17491,
+      "landed": 6187,
+      "headLanded": 4047,
+      "bodyLanded": 2140,
+      "knockdownsFor": 33,
       "knockdownsAgainst": 19,
       "punchMix": {
-        "jab": 3899,
-        "cross": 445,
-        "lead_hook": 7852,
-        "rear_hook": 1098,
-        "lead_upper": 4636,
-        "rear_upper": 231
+        "jab": 4760,
+        "cross": 2023,
+        "lead_hook": 7036,
+        "rear_hook": 1291,
+        "lead_upper": 2114,
+        "rear_upper": 267
       }
     }
   ],
   "matchup": {
     "out_boxer": {
       "pressure": {
-        "w": 2,
+        "w": 4,
         "l": 5,
-        "d": 3
+        "d": 1
       },
       "counterpuncher": {
-        "w": 5,
-        "l": 3,
-        "d": 2
-      },
-      "brawler": {
         "w": 3,
         "l": 7,
         "d": 0
+      },
+      "brawler": {
+        "w": 5,
+        "l": 4,
+        "d": 1
       },
       "boxer_puncher": {
         "w": 4,
@@ -137,18 +137,40 @@
     },
     "pressure": {
       "out_boxer": {
-        "w": 3,
-        "l": 5,
+        "w": 4,
+        "l": 4,
         "d": 2
       },
       "counterpuncher": {
-        "w": 2,
-        "l": 6,
-        "d": 2
+        "w": 7,
+        "l": 3,
+        "d": 0
       },
       "brawler": {
-        "w": 3,
-        "l": 7,
+        "w": 4,
+        "l": 6,
+        "d": 0
+      },
+      "boxer_puncher": {
+        "w": 7,
+        "l": 3,
+        "d": 0
+      }
+    },
+    "counterpuncher": {
+      "out_boxer": {
+        "w": 4,
+        "l": 5,
+        "d": 1
+      },
+      "pressure": {
+        "w": 5,
+        "l": 4,
+        "d": 1
+      },
+      "brawler": {
+        "w": 4,
+        "l": 6,
         "d": 0
       },
       "boxer_puncher": {
@@ -157,32 +179,10 @@
         "d": 0
       }
     },
-    "counterpuncher": {
-      "out_boxer": {
-        "w": 1,
-        "l": 8,
-        "d": 1
-      },
-      "pressure": {
-        "w": 7,
-        "l": 3,
-        "d": 0
-      },
-      "brawler": {
-        "w": 7,
-        "l": 3,
-        "d": 0
-      },
-      "boxer_puncher": {
-        "w": 6,
-        "l": 1,
-        "d": 3
-      }
-    },
     "brawler": {
       "out_boxer": {
-        "w": 7,
-        "l": 3,
+        "w": 6,
+        "l": 4,
         "d": 0
       },
       "pressure": {
@@ -191,52 +191,52 @@
         "d": 0
       },
       "counterpuncher": {
-        "w": 5,
-        "l": 5,
-        "d": 0
+        "w": 3,
+        "l": 6,
+        "d": 1
       },
       "boxer_puncher": {
-        "w": 5,
-        "l": 5,
+        "w": 4,
+        "l": 6,
         "d": 0
       }
     },
     "boxer_puncher": {
       "out_boxer": {
         "w": 4,
-        "l": 6,
-        "d": 0
+        "l": 5,
+        "d": 1
       },
       "pressure": {
-        "w": 5,
-        "l": 5,
+        "w": 3,
+        "l": 7,
         "d": 0
       },
       "counterpuncher": {
         "w": 5,
-        "l": 4,
-        "d": 1
+        "l": 3,
+        "d": 2
       },
       "brawler": {
-        "w": 3,
-        "l": 7,
+        "w": 1,
+        "l": 9,
         "d": 0
       }
     }
   },
   "failures": [],
   "hashes": [
-    "1000:mirror_out_boxer:mirror_pressure:84db85ac5eca2fda",
-    "1001:mirror_out_boxer:mirror_counterpuncher:bba55b9d4e38f523",
-    "1002:mirror_out_boxer:mirror_brawler:e4fed4e26460af8b",
-    "1003:mirror_out_boxer:mirror_boxer_puncher:f78dd6d8074e9b98",
-    "1004:mirror_pressure:mirror_out_boxer:c6bec04a1c9a858b",
-    "1005:mirror_pressure:mirror_counterpuncher:96efc41b9793f18c",
-    "1006:mirror_pressure:mirror_brawler:00582aa1b399c66b",
-    "1007:mirror_pressure:mirror_boxer_puncher:1a8a99c400ebb5cd",
-    "1008:mirror_counterpuncher:mirror_out_boxer:0cb5063868481d38",
-    "1009:mirror_counterpuncher:mirror_pressure:0024ca02ffee1a4b",
-    "1010:mirror_counterpuncher:mirror_brawler:eeb3e8af855829da",
-    "1011:mirror_counterpuncher:mirror_boxer_puncher:a2e2b8896e5a5bdb"
+    "1000:mirror_out_boxer:mirror_pressure:9f724077baf9f034",
+    "1001:mirror_out_boxer:mirror_counterpuncher:63def09f3e5e3138",
+    "1002:mirror_out_boxer:mirror_brawler:e10bc848a98b1483",
+    "1003:mirror_out_boxer:mirror_boxer_puncher:6332f58f28de1d3e",
+    "1004:mirror_pressure:mirror_out_boxer:d783cf5193113943",
+    "1005:mirror_pressure:mirror_counterpuncher:10f2e20cecfd72af",
+    "1006:mirror_pressure:mirror_brawler:a416a8faa211401d",
+    "1007:mirror_pressure:mirror_boxer_puncher:5a89bab9522e4107",
+    "1008:mirror_counterpuncher:mirror_out_boxer:c9696e8ada0751f8",
+    "1009:mirror_counterpuncher:mirror_pressure:9dcabb6f568c1be0",
+    "1010:mirror_counterpuncher:mirror_brawler:defad825fe4ce5b9",
+    "1011:mirror_counterpuncher:mirror_boxer_puncher:2cc4dfb7b4fce5db"
   ]
 }

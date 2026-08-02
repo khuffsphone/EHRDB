@@ -130,9 +130,14 @@ describe('bout determinism', () => {
     expect(Math.abs(winsAsZero - winsAsOne)).toBeLessThanOrEqual(14);
   });
 
-  it('golden hash: a fixed scripted input stream reproduces a known state', () => {
-    // A regression tripwire. If this changes, the combat model changed —
-    // which is fine, but it must be a deliberate, reviewed change.
+  it('reproduces a scripted input stream within a single process', () => {
+    /*
+     * Same-build reproducibility, and only that. This test cannot detect a
+     * changed combat model, because both sides of the comparison change
+     * together — it was previously named "golden hash", which claimed exactly
+     * the guarantee it does not provide. The real golden fixture, pinned to
+     * committed bytes, lives in tests/sim/replay.test.ts.
+     */
     const sim = new BoutSim(config(31337));
     const script: FighterCommand[] = [];
     for (let i = 0; i < 400; i++) {
@@ -145,8 +150,7 @@ describe('bout determinism', () => {
     }
     for (const c of script) sim.tick([c, emptyCommand()]);
     const hash = sim.hashState();
-    // Re-run and confirm the same hash rather than pinning a literal, so the
-    // test stays meaningful across intentional balance changes.
+
     const sim2 = new BoutSim(config(31337));
     for (const c of script) sim2.tick([c, emptyCommand()]);
     expect(sim2.hashState()).toBe(hash);

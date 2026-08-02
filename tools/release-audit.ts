@@ -157,6 +157,51 @@ if (existsSync(DIST)) {
     }
   }
   console.log(`  · bundle scanned: ${bundleFiles.length} files, ${mediaCount} binary media`);
+
+  // --- 4b. The bundle can say which source produced it ---------------------
+  //
+  // An artifact nobody can trace to a commit is an artifact nobody can audit.
+  // The manifest is written by the Vite build; see vite.config.ts.
+  const MANIFEST = join(DIST, 'build-manifest.json');
+  if (!existsSync(MANIFEST)) {
+    findings.push({ severity: 'block', file: MANIFEST, message: 'build manifest is missing — the artifact has no provenance' });
+  } else {
+    let manifest: Record<string, unknown> = {};
+    try {
+      manifest = JSON.parse(readFileSync(MANIFEST, 'utf8')) as Record<string, unknown>;
+    } catch {
+      findings.push({ severity: 'block', file: MANIFEST, message: 'build manifest is not readable JSON' });
+    }
+    for (const field of ['commit', 'lockfileHash', 'builtAt', 'version', 'ci'] as const) {
+      if (typeof manifest[field] !== 'string' || manifest[field] === '') {
+        findings.push({ severity: 'block', file: MANIFEST, message: `build manifest is missing "${field}"` });
+      }
+    }
+    // `unknown` is honest, but it is not shippable: it means the build could
+    // not determine what it was built from.
+    if (manifest.commit === 'unknown') {
+      findings.push({ severity: 'block', file: MANIFEST, message: 'build manifest has no commit — built outside a git checkout' });
+    }
+    if (manifest.lockfileHash === 'unknown') {
+      findings.push({ severity: 'block', file: MANIFEST, message: 'build manifest has no lockfile hash — the dependency set is unpinned' });
+    }
+    if (manifest.dirty === true) {
+      findings.push({ severity: 'warn', file: MANIFEST, message: 'built from a dirty working tree — not reproducible from the recorded commit' });
+    }
+    if (manifest.ci === 'local') {
+      findings.push({ severity: 'warn', file: MANIFEST, message: 'built locally — a release artifact must come from CI' });
+    }
+    // The commit in the manifest must be the one compiled into the bundle,
+    // or the manifest is describing a different build than the one shipped.
+    const commit = String(manifest.commit ?? '');
+    const inBundle = bundleFiles
+      .filter((f) => extname(f).toLowerCase() === '.js')
+      .some((f) => readFileSync(f, 'utf8').includes(commit));
+    if (commit !== '' && commit !== 'unknown' && !inBundle) {
+      findings.push({ severity: 'block', file: MANIFEST, message: 'manifest commit does not appear in the bundle — mismatched artifacts' });
+    }
+    console.log(`  · build identity: ${commit.slice(0, 8)} lockfile ${String(manifest.lockfileHash).slice(0, 8)} ci ${String(manifest.ci)}`);
+  }
 } else {
   findings.push({ severity: 'warn', file: DIST, message: 'no build present — run `npm run build` before auditing a release' });
 }

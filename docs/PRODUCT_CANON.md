@@ -51,3 +51,29 @@ editor, touch controls.
 Create a boxer → pick an opponent from the ranked ladder → fight → rank
 exchange, purse and record → training camp → the division fights on around you
 → challenge or choose again → decline → retirement and a legacy grade.
+
+## Balance targets
+
+Settled numbers. They are enforced, not asserted about: the single definition
+is `tools/balance-targets.ts`, and `npm run assets:validate` fails the build if
+this table stops agreeing with it.
+
+| Measure | Target | Enforced by |
+|---|---|---|
+| Win rate, every archetype, ratings held equal | 40%–60% | `npm run balance:certify` |
+| Punches landed as a share of thrown | 30%–40% | `tests/ai/soak.test.ts` |
+| Mean rounds completed, of 6.3 scheduled | 4.4–5.6 | `tests/ai/soak.test.ts` |
+| Bouts ending inside the distance | 30%–45% | `tests/ai/soak.test.ts` |
+
+Certification runs 1200 mirror bouts. That sample size is part of the claim,
+not an implementation detail: each archetype contests 480 bouts, giving a
+standard error near 2.3% and a 95% interval of about ±4.5%, which is narrow
+enough for a ±10-point band to mean something. The 200-bout batch used during
+iteration carries a standard error of 5.6% per archetype — wider than half the
+band — so it is checked against a deliberately widened range instead, and is
+not evidence that the target is met.
+
+Measurement uses the mirror roster, where every fighter has identical ratings
+and the archetype is the only variable (decision D-013). The ranked roster
+confounds strategy with stats and cannot answer whether an archetype is
+balanced.

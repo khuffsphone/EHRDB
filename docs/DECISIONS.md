@@ -113,3 +113,68 @@ minutes because menus wrap and keypress arithmetic drifted. The harness now
 verifies the active scene after every transition and navigates by row label via
 a read-only introspection hook. It caught four real defects immediately
 afterwards.
+
+**D-019 — Every quantitative claim in the documents is enforced by a test.**
+The project claimed a 40–60% archetype band in three documents while the soak
+gate asserted 20–80%, and the committed evidence showed 35–60%. Nothing failed,
+because the gate cited as proof of the claim was never checking the claim. The
+targets now live once, in `tools/balance-targets.ts`; the test and the
+certification tool read them, and `npm run assets:validate` fails the build if
+the prose stops matching. The general rule: if a number in a specification is
+not asserted somewhere, it will drift, and the drift will not be noticed by the
+person who wrote it.
+
+**D-020 — The balance band is certified at 1200 mirror bouts, not 200.**
+A win rate measured over 80 bouts — what an archetype contests in the 200-bout
+iteration soak — has a standard error near 5.6%, so its 95% interval is about
+±11%: wider than the entire 40–60% band. Asserting the band at that sample
+measures the seed. Certification therefore runs 1200 bouts (480 per archetype,
+±4.5%), and the iteration soak checks a widened band that its sample can
+actually support. The sample size is part of the claim, not an implementation
+detail.
+
+**D-021 — The golden fixture is committed bytes, not a same-process rerun.**
+The test named "golden hash" built the same bout twice and compared it to
+itself. That detects non-determinism within one process and nothing else; it
+would have passed unchanged through every balance change in this repository.
+`tests/fixtures/replay.json` now pins checkpoint hashes, final hashes and whole
+AI bout outcomes from a reviewed commit. Regenerating is deliberate
+(`npm run fixture:replay`) and shows up as a diff.
+
+**D-022 — The state hash covers the future, not the present.**
+`hashState` omitted the RNG stream position, so two states that looked
+identical and would diverge on the very next draw hashed the same. It also
+omitted the input buffer's level and age, the idle/clinch/rope timers, and the
+in-progress scorecard. All are included now, and
+`tests/sim/replay.test.ts` perturbs every field of `FighterState` in turn to
+prove the hash moves — so a field added later without a matching line fails
+immediately rather than surfacing as an unreproducible replay months on.
+
+**D-023 — Input edges are consumed once, level state applies to every tick.**
+The bout scene sampled the device once per frame and fed that snapshot to every
+tick of a fixed-step catch-up burst. A held direction genuinely applies to all
+of them; a press does not — the repeats landed inside the input buffer window
+and queued punches the player never asked for, specifically on frames that were
+already stuttering. Edges are cleared after the first tick of a burst
+(`levelOnly`). Filed by the external review under determinism; it was a
+gameplay defect.
+
+**D-024 — Saves are validated recursively, and a reset actually erases.**
+`parseSave` checked the envelope and then cast the career, slots and legacy
+board to their TypeScript types — an assertion that compiles to nothing. A
+malformed save loaded cleanly and crashed several screens later. Nested
+structures are now walked and checked (`src/save/validate.ts`), with the rule
+that a missing value with an obvious default is filled and a value of the wrong
+kind is rejected. Separately, `reset` cleared the backup slot and then called
+`write`, which rolls the outgoing save into the backup — so it deleted the
+backup and immediately refilled it with the career the player had asked to
+destroy.
+
+**D-025 — Release artifacts carry their own provenance.**
+Every build embeds its commit, lockfile hash, build time, version and CI run id,
+and writes them to `dist/build-manifest.json`; the title screen shows the short
+form so a bug report and a reproduction are provably about the same bytes. The
+release audit blocks on a missing manifest, an unknown commit or lockfile, and
+on a manifest whose commit does not appear in the bundle. It warns on a build
+made locally or from a dirty tree, because a release artifact should come from
+CI.

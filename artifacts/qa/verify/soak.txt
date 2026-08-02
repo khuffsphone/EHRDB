@@ -1,34 +1,34 @@
 $ npx tsx tools/soak.ts --bouts 200 --json artifacts/qa/soak.json
 
 
-AI SOAK — 200 bouts at difficulty "contender" (16.9s)
+AI SOAK — 200 bouts at difficulty "contender" (17.4s)
 
-  outcomes      KO 57  TKO 12  decision 128  draw 3
-  mean rounds   4.94
-  mean length   8.0 min of simulated time
-  mean accuracy 36%
+  outcomes      KO 63  TKO 13  decision 121  draw 3
+  mean rounds   5.04
+  mean length   8.2 min of simulated time
+  mean accuracy 36.8%
 
   archetype           win%   KO%   thrown  land%  head/body   KD+  KD-
-  boxer_puncher      80.4%  14.9%     563  23.2%     86/14    8    3
-  brawler            25.3% 100.0%     168  34.1%      99/1   30   27
-  counterpuncher     75.5%  12.5%     257  40.8%      94/6    1    2
-  out_boxer          52.8%   7.1%     345  36.6%      96/4    0    5
-  pressure           29.1%  86.7%     177  32.4%     69/31   30   32
+  boxer_puncher      80.4%  27.0%     594  26.4%     88/12   13    5
+  brawler            27.3%  88.9%     125  31.4%      98/2   29   10
+  counterpuncher     67.9%  25.0%     291  40.2%      94/6    8    4
+  out_boxer          56.6%  10.0%     328  37.6%      97/3    0    9
+  pressure           29.1%  66.7%     251  35.6%     75/25   30   52
 
   archetype matchup matrix (row wins vs column, as row corner)
                    boxer_pu   brawler  counterp  out_boxe  pressure
-  boxer_puncher      50%(6)   92%(12)    67%(6)    67%(6)   92%(12)
-  brawler            0%(14)    43%(7)     0%(7)    14%(7)   36%(14)
-  counterpuncher     25%(8)   100%(8)         -    75%(4)    88%(8)
-  out_boxer          25%(8)    50%(8)    25%(4)         -    88%(8)
-  pressure           7%(14)   53%(15)     0%(8)    13%(8)    38%(8)
+  boxer_puncher      83%(6)  100%(12)    50%(6)    83%(6)   83%(12)
+  brawler            0%(14)    57%(7)     0%(7)    29%(7)   43%(14)
+  counterpuncher     25%(8)    88%(8)         -    75%(4)   100%(8)
+  out_boxer          25%(8)    63%(8)    75%(4)         -    88%(8)
+  pressure          14%(14)   47%(15)    25%(8)    13%(8)    13%(8)
 
   punch mix (share of punches thrown, per archetype)
-  boxer_puncher     jab:41%  cross:31%  lead_hook:22%  rear_hook:3%  lead_upper:1%  rear_upper:2%
-  brawler           jab:24%  cross:28%  lead_hook:21%  rear_hook:18%  lead_upper:1%  rear_upper:8%
-  counterpuncher    jab:35%  cross:44%  lead_hook:13%  rear_hook:5%  lead_upper:3%  rear_upper:1%
-  out_boxer         jab:67%  cross:22%  lead_hook:10%  rear_hook:1%  lead_upper:0%  rear_upper:0%
-  pressure          jab:21%  cross:3%  lead_hook:42%  rear_hook:7%  lead_upper:25%  rear_upper:1%
+  boxer_puncher     jab:42%  cross:40%  lead_hook:13%  rear_hook:3%  lead_upper:1%  rear_upper:1%
+  brawler           jab:22%  cross:26%  lead_hook:22%  rear_hook:25%  lead_upper:0%  rear_upper:5%
+  counterpuncher    jab:34%  cross:45%  lead_hook:12%  rear_hook:6%  lead_upper:2%  rear_upper:2%
+  out_boxer         jab:63%  cross:26%  lead_hook:10%  rear_hook:2%  lead_upper:0%  rear_upper:0%
+  pressure          jab:27%  cross:13%  lead_hook:38%  rear_hook:8%  lead_upper:13%  rear_upper:2%
 
   no deadlocks, NaN, invalid transitions or impossible results.
 

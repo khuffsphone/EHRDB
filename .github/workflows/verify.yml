@@ -1,0 +1,68 @@
+# Independent verification.
+#
+# Everything in docs/ACCEPTANCE_TESTS.md runs here, on a clean checkout, with
+# the exact lockfile. A green badge on this workflow is the only evidence of
+# correctness that does not depend on trusting a local machine's output.
+#
+# Release artifacts are produced *only* by this workflow. A build carrying
+# `"ci": "local"` in its manifest did not come through here.
+name: verify
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The build manifest records the commit; a shallow clone still needs
+          # the ref itself, and `git status` must be able to run.
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # `npm ci` rather than `npm install`: the lockfile is part of the build
+      # identity, and a resolved-differently dependency tree is a different
+      # build even when the source is identical.
+      - name: Install
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify
+        run: npm run verify
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-evidence-${{ github.sha }}
+          path: |
+            artifacts/qa/
+          retention-days: 30
+
+      - name: Upload release candidate
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ten-count-${{ github.sha }}
+          path: dist/
+          retention-days: 30

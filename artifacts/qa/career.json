@@ -1,22 +1,21 @@
 {
   "careers": 12,
-  "reachedTitleShot": 11,
-  "wonTitle": 11,
+  "reachedTitleShot": 12,
+  "wonTitle": 10,
   "endings": {
-    "ending.boutLimit": 8,
-    "ending.lossStreak": 4
+    "ending.boutLimit": 9,
+    "ending.lossStreak": 3
   },
   "grades": {
-    "grade.allTime": 2,
-    "grade.contender": 2,
-    "grade.champion": 2,
-    "grade.great": 5,
-    "grade.clubFighter": 1
+    "grade.allTime": 3,
+    "grade.journeyman": 2,
+    "grade.contender": 5,
+    "grade.champion": 2
   },
   "meanBouts": 18.8,
-  "meanWins": 12.3,
-  "meanEarnings": 6071363,
-  "maxEarnings": 9932600,
+  "meanWins": 11.6,
+  "meanEarnings": 5478273,
+  "maxEarnings": 10540000,
   "meanPeakRank": 1.3,
   "failures": []
 }

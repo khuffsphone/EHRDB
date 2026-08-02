@@ -1,5 +1,8 @@
 $ npx tsx tools/release-audit.ts
 
-  · bundle scanned: 3 files, 0 binary media
+  · bundle scanned: 4 files, 0 binary media
+  · build identity: 353c992b lockfile 0a0ec05b ci local
   · no ROM data, no reference-work terms, no private paths, no unfinished markers on a release path
-release audit passed
+release audit passed (2 warning(s))
+  warn  dist/build-manifest.json: built from a dirty working tree — not reproducible from the recorded commit
+  warn  dist/build-manifest.json: built locally — a release artifact must come from CI

@@ -1,0 +1,137 @@
+{
+  "scriptVersion": "scripted-v1",
+  "note": "Golden replay fixture. These values are pinned, not recomputed. If a test fails against them the simulation changed — regenerate with `npm run fixture:replay` only when that change was intended, and review the diff.",
+  "scripted": {
+    "seed": 31337,
+    "rounds": 3,
+    "venueId": "ironworks",
+    "fighters": [
+      "nikolai_vasque",
+      "bram_holt"
+    ],
+    "ticks": 7200,
+    "checkpoints": [
+      {
+        "tick": 600,
+        "hash": "8171560deeec1abe"
+      },
+      {
+        "tick": 1200,
+        "hash": "6f72fdbfcd8066d5"
+      },
+      {
+        "tick": 1800,
+        "hash": "e922b701ef81a8f0"
+      },
+      {
+        "tick": 2400,
+        "hash": "7ad1552f84d49c98"
+      },
+      {
+        "tick": 3000,
+        "hash": "64da76a69d7a3ae4"
+      },
+      {
+        "tick": 3600,
+        "hash": "0ffebba45c695d6d"
+      },
+      {
+        "tick": 4200,
+        "hash": "319a2c7efb40ebb5"
+      },
+      {
+        "tick": 4800,
+        "hash": "48def468ee9cdf14"
+      },
+      {
+        "tick": 5400,
+        "hash": "2649636a7a6221df"
+      },
+      {
+        "tick": 6000,
+        "hash": "1de81d70fd9c6345"
+      },
+      {
+        "tick": 6600,
+        "hash": "47812b838a37d9b1"
+      },
+      {
+        "tick": 7200,
+        "hash": "5397605626cf9cf2"
+      }
+    ],
+    "finalHash": "5397605626cf9cf2"
+  },
+  "aiBouts": [
+    {
+      "seed": 777,
+      "rounds": 6,
+      "venueId": "ironworks",
+      "fighters": [
+        "nikolai_vasque",
+        "bram_holt"
+      ],
+      "difficulty": "title",
+      "ticks": 36121,
+      "finalHash": "c5e2443a99e4fee5",
+      "outcome": {
+        "kind": "decision",
+        "winner": 0,
+        "round": 6
+      },
+      "knockdowns": [
+        0,
+        0
+      ],
+      "stats": [
+        {
+          "thrown": 668,
+          "landed": 219,
+          "head": 164,
+          "body": 55
+        },
+        {
+          "thrown": 426,
+          "landed": 176,
+          "head": 133,
+          "body": 43
+        }
+      ]
+    },
+    {
+      "seed": 4242,
+      "rounds": 3,
+      "venueId": "ironworks",
+      "fighters": [
+        "silas_orrin",
+        "nikolai_vasque"
+      ],
+      "difficulty": "contender",
+      "ticks": 17761,
+      "finalHash": "7a6160e3fb489f10",
+      "outcome": {
+        "kind": "decision",
+        "winner": 1,
+        "round": 3
+      },
+      "knockdowns": [
+        0,
+        0
+      ],
+      "stats": [
+        {
+          "thrown": 293,
+          "landed": 121,
+          "head": 112,
+          "body": 9
+        },
+        {
+          "thrown": 268,
+          "landed": 133,
+          "head": 126,
+          "body": 7
+        }
+      ]
+    }
+  ]
+}

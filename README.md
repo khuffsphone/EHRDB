@@ -109,6 +109,13 @@ everything else.
 | `npm run qa:smoke` | Browser end-to-end: menu → bout → result → save → reload |
 | `npm run qa:screens` | Screenshot every screen at three viewports |
 | `npm run release:audit` | Legal and provenance audit |
+| `npm run balance:certify` | Assert the documented balance targets over 1200 control bouts |
+| `npm run balance:tune` | Search the archetype profile space; prints a patch, never writes one |
+| `npm run fixture:replay` | Regenerate the committed golden replay fixture |
+
+Every gate also runs on push in `.github/workflows/verify.yml`, on a clean
+checkout with the pinned lockfile. That run is the only evidence of
+correctness that does not depend on trusting a local machine.
 
 ## Deploying
 
@@ -119,6 +126,12 @@ subdirectory:
 npm ci && npm run build
 # then copy dist/ to any static host
 ```
+
+Every build writes `dist/build-manifest.json` recording the commit, the
+lockfile hash, the build time and the CI run, and the same identity is
+compiled into the bundle and shown on the title screen. A build whose manifest
+says `"ci": "local"` did not come from the pipeline; `npm run release:audit`
+warns on it and blocks entirely if the commit or lockfile is unknown.
 
 It works from `file://` in most browsers, and from any static host —
 GitHub Pages, Netlify, S3, or `python3 -m http.server` inside `dist/`.
