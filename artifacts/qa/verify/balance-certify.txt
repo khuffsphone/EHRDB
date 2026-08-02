@@ -1,7 +1,7 @@
 $ npx tsx tools/soak.ts --certify --seed 63000 --json artifacts/qa/balance-certify.json
 
 
-AI SOAK — 1200 bouts at difficulty "contender" [MIRROR: identical ratings, archetype only] (91.8s)
+AI SOAK — 1200 bouts at difficulty "contender" [MIRROR: identical ratings, archetype only] (89.7s)
 
   outcomes      KO 499  TKO 16  decision 632  draw 53
   mean rounds   4.8

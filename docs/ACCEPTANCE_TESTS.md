@@ -27,6 +27,13 @@ all with `npm run verify`.
 | 20 | Structurally malformed saves fail at load with a path, not at a screen with a crash | `tests/save/validate.test.ts` | PASS |
 | 21 | Every gate runs on a clean machine, not only locally | `.github/workflows/verify.yml` | PASS |
 | 22 | A release artifact can be traced to the commit and dependency set that produced it | `dist/build-manifest.json` + `npm run release:audit` | PASS |
+| 23 | No phantom edge inputs at catch-up rates from 1 to 60 ticks | `tests/input/edges.test.ts` — 1, 2, 3, 6, 12, 60 | PASS |
+| 24 | The replay fixture is self-contained: it stores the commands, not a recipe | `tests/sim/replay.test.ts` + `tests/fixtures/replay.json` | PASS |
+| 25 | A content-data change is distinguishable from a combat-model change | `contentHashes` in the fixture | PASS |
+| 26 | The artifact hash in the manifest matches the bundle on disk | `npm run release:audit` recomputes it | PASS |
+| 27 | A release candidate cannot be built from a dirty tree or outside CI | `RELEASE=1 npx tsx tools/release-audit.ts`, run by the workflow | PASS |
+| 28 | A save naming content this build does not have fails at load, not at a screen | `tests/save/validate.test.ts` | PASS |
+| 29 | The questions automation cannot answer are written down | `docs/PLAYTEST_BRIEF.md` | PASS |
 
 ## Browser and human-visible gates
 

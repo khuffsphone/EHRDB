@@ -73,6 +73,7 @@ none anywhere, which was false.
 | `npm run balance:certify` | Assert the documented balance targets over 1200 control bouts |
 | `npm run balance:tune` | Search the archetype profile space; prints a patch, never writes one |
 | `npm run fixture:replay` | Regenerate the committed golden replay fixture |
+| `RELEASE=1 npm run release:audit` | Release-grade audit: a dirty tree or a local build blocks |
 
 ## Acceptance gates
 
@@ -101,13 +102,22 @@ asserted at that sample measures the seed rather than the balance. Iterate at
 `npm run balance:tune` searches the profile space by paired coordinate descent
 and prints a patch. It never writes one — balance is a design decision.
 
+## Handoff
+
+A handoff is not a status sentence. Every one carries: the source ref, the
+changed files, the artifact hash from `dist/build-manifest.json`, the full
+`npm run verify` output, the known limitations, and the current
+`docs/PLAYTEST_BRIEF.md` — the questions automation cannot answer. "All tests
+pass" is not a handoff, and neither is "feels better".
+
 ## Documents
 
 `docs/PRODUCT_CANON.md` (settled decisions) · `COMBAT_SPEC` · `AI_SPEC` ·
 `CAREER_SPEC` · `CONTENT_SCHEMAS` · `UI_FLOWS` · `ACCESSIBILITY` ·
 `DECISIONS` (every judgement call) · `SOURCE_MAP` (how each rule is grounded) ·
 `ORIGINAL_GAME_FINDINGS` · `ACCEPTANCE_TESTS` · `TEST_REPORT` ·
-`RELEASE_NOTES` · `LEGAL_AND_ASSET_LEDGER` · `RUN_STATE`.
+`RELEASE_NOTES` · `LEGAL_AND_ASSET_LEDGER` · `PLAYTEST_BRIEF` ·
+`PLAYBOOK_COMPLIANCE` · `RUN_STATE`.
 
 Precedence when they disagree: legal restrictions → acceptance gates →
 product canon → subsystem specs → research findings → inference.

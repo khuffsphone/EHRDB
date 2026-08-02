@@ -50,6 +50,19 @@ jobs:
       - name: Verify
         run: npm run verify
 
+      # The release-grade audit. `RELEASE=1` promotes "built from a dirty tree"
+      # and "built locally" from warnings to blocking errors, so the artifact
+      # this job publishes cannot have come from anywhere but this checkout.
+      - name: Certify the release artifact
+        run: RELEASE=1 npx tsx tools/release-audit.ts
+
+      - name: Record the artifact hash
+        run: |
+          echo "### Release candidate" >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat dist/build-manifest.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -59,10 +72,24 @@ jobs:
             artifacts/qa/
           retention-days: 30
 
+      # Appendix A: the artifact never travels without its identity and
+      # evidence. A playable build that arrives alone cannot be audited.
+      - name: Assemble the release folder
+        if: success()
+        run: |
+          mkdir -p release/replays release/screens
+          cp -r dist/. release/
+          cp artifacts/qa/verify-summary.json release/ 2>/dev/null || true
+          cp tests/fixtures/replay.json release/replays/ 2>/dev/null || true
+          cp -r artifacts/qa/screens/. release/screens/ 2>/dev/null || true
+          cp docs/PLAYTEST_BRIEF.md release/playtest-brief.md
+          cp docs/LEGAL_AND_ASSET_LEDGER.md release/legal-and-asset-ledger.md
+          cp docs/RELEASE_NOTES.md release/release-notes.md
+
       - name: Upload release candidate
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: ten-count-${{ github.sha }}
-          path: dist/
+          path: release/
           retention-days: 30

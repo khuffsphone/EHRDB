@@ -14,7 +14,7 @@
  */
 import { execSync } from 'node:child_process';
 import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
-import { extname, join } from 'node:path';
+import { extname, join, sep } from 'node:path';
 import { createHash } from 'node:crypto';
 
 interface Finding {
@@ -172,9 +172,41 @@ if (existsSync(DIST)) {
     } catch {
       findings.push({ severity: 'block', file: MANIFEST, message: 'build manifest is not readable JSON' });
     }
-    for (const field of ['commit', 'lockfileHash', 'builtAt', 'version', 'ci'] as const) {
+    for (const field of ['commit', 'lockfileHash', 'builtAt', 'version', 'ci', 'artifactHash'] as const) {
       if (typeof manifest[field] !== 'string' || manifest[field] === '') {
         findings.push({ severity: 'block', file: MANIFEST, message: `build manifest is missing "${field}"` });
+      }
+    }
+
+    // Recompute the artifact hash. A manifest that merely *claims* a digest
+    // proves nothing; the point of the field is that anyone can check it, so
+    // the audit checks it. Same construction as vite.config.ts.
+    const manifestFiles = Array.isArray(manifest.files) ? (manifest.files as string[]) : [];
+    const onDisk = bundleFiles
+      .map((f) => f.slice(DIST.length + 1).split(sep).join('/'))
+      .filter((f) => f !== 'build-manifest.json')
+      .sort();
+    if (manifestFiles.join('|') !== onDisk.join('|')) {
+      findings.push({
+        severity: 'block',
+        file: MANIFEST,
+        message: `manifest lists ${manifestFiles.length} file(s) but the bundle has ${onDisk.length}`,
+      });
+    } else {
+      const whole = createHash('sha256');
+      for (const rel of onDisk) {
+        whole.update(rel);
+        whole.update('\0');
+        whole.update(readFileSync(join(DIST, rel)));
+        whole.update('\0');
+      }
+      const recomputed = `sha256:${whole.digest('hex')}`;
+      if (manifest.artifactHash !== recomputed) {
+        findings.push({
+          severity: 'block',
+          file: MANIFEST,
+          message: `artifact hash does not match the bundle on disk (manifest ${String(manifest.artifactHash).slice(0, 23)}…, actual ${recomputed.slice(0, 23)}…)`,
+        });
       }
     }
     // `unknown` is honest, but it is not shippable: it means the build could
@@ -185,11 +217,19 @@ if (existsSync(DIST)) {
     if (manifest.lockfileHash === 'unknown') {
       findings.push({ severity: 'block', file: MANIFEST, message: 'build manifest has no lockfile hash — the dependency set is unpinned' });
     }
+    /*
+     * A release candidate must be clean and CI-built; a development build need
+     * not be. Both are reported either way — the only thing RELEASE=1 changes
+     * is whether they stop the run, so a developer is never blocked and a
+     * release can never quietly ship from someone's laptop.
+     */
+    const releaseMode = process.env.RELEASE === '1';
+    const severity: Finding['severity'] = releaseMode ? 'block' : 'warn';
     if (manifest.dirty === true) {
-      findings.push({ severity: 'warn', file: MANIFEST, message: 'built from a dirty working tree — not reproducible from the recorded commit' });
+      findings.push({ severity, file: MANIFEST, message: 'built from a dirty working tree — not reproducible from the recorded commit' });
     }
     if (manifest.ci === 'local') {
-      findings.push({ severity: 'warn', file: MANIFEST, message: 'built locally — a release artifact must come from CI' });
+      findings.push({ severity, file: MANIFEST, message: 'built locally — a release artifact must come from CI' });
     }
     // The commit in the manifest must be the one compiled into the bundle,
     // or the manifest is describing a different build than the one shipped.
@@ -200,7 +240,10 @@ if (existsSync(DIST)) {
     if (commit !== '' && commit !== 'unknown' && !inBundle) {
       findings.push({ severity: 'block', file: MANIFEST, message: 'manifest commit does not appear in the bundle — mismatched artifacts' });
     }
-    console.log(`  · build identity: ${commit.slice(0, 8)} lockfile ${String(manifest.lockfileHash).slice(0, 8)} ci ${String(manifest.ci)}`);
+    console.log(
+      `  · build identity: ${commit.slice(0, 8)} lockfile ${String(manifest.lockfileHash).slice(0, 8)} ` +
+        `ci ${String(manifest.ci)} artifact ${String(manifest.artifactHash ?? '').slice(7, 19)}`,
+    );
   }
 } else {
   findings.push({ severity: 'warn', file: DIST, message: 'no build present — run `npm run build` before auditing a release' });

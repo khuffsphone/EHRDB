@@ -149,3 +149,67 @@ describe('legacy board validation', () => {
     if (result.ok) expect(result.value).toEqual([]);
   });
 });
+
+describe('roster references', () => {
+  it('rejects a ladder entry naming a fighter this build does not have', () => {
+    // A save can outlive the content it points at. Rejecting at load beats
+    // throwing from getFighter() on the opponent-selection screen, where
+    // nothing indicates the cause was a stale save.
+    const raw = tampered((c) => {
+      (c.ladder as Record<string, unknown>[])[0].fighterId = 'someone_who_retired_in_a_previous_build';
+    });
+    const result = parseSave(raw);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.reason).toMatch(/not in this build's roster/);
+  });
+
+  it('drops a stale offered opponent instead of rejecting the career', () => {
+    // Repairable: the offer list is regenerated every bout, so a stale entry
+    // costs nothing to drop. A ladder entry is not — it carries a record.
+    const raw = tampered((c) => {
+      c.offeredOpponents = ['nikolai_vasque', 'a_fighter_that_no_longer_exists'];
+    });
+    const result = parseSave(raw);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.save.career?.offeredOpponents).toEqual(['nikolai_vasque']);
+    }
+  });
+
+  it('clears a challenge from a fighter who no longer exists', () => {
+    const raw = tampered((c) => {
+      c.pendingChallenge = { challengerId: 'gone', challengerName: 'Gone', challengerRank: 2, rounds: 10, purse: 1, refusalRank: 9 };
+    });
+    const result = parseSave(raw);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.save.career?.pendingChallenge).toBeNull();
+  });
+
+  it('accepts the player themselves, who is never on the roster', () => {
+    const result = parseSave(tampered(() => undefined));
+    expect(result.ok).toBe(true);
+  });
+});
+
+describe('save export identity', () => {
+  it('records which build wrote the save', () => {
+    const save = emptySave();
+    const written = JSON.parse(serialiseSave(save, NOW)) as Record<string, unknown>;
+    expect(written.build).toBeDefined();
+    const build = written.build as Record<string, unknown>;
+    expect(typeof build.version).toBe('string');
+    expect(typeof build.commit).toBe('string');
+    expect(typeof build.ci).toBe('string');
+    // Schema version travels with it, so an export names both the data shape
+    // and the artifact that produced it.
+    expect(written.version).toBe(save.version);
+  });
+
+  it('loads a save that carries no build stamp', () => {
+    // Saves written before build stamping existed must still load.
+    const save = emptySave();
+    const o = JSON.parse(serialiseSave(save, NOW)) as Record<string, unknown>;
+    delete o.build;
+    expect(parseSave(JSON.stringify(o)).ok).toBe(true);
+  });
+});

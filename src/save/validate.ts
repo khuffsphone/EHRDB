@@ -24,6 +24,7 @@
  */
 import type { CareerEnding, CareerState, LadderEntry, BoutRecord, LegacyRecord, PendingChallenge, TrainingOption } from '@career/types';
 import type { FighterDefinition } from '@sim/types';
+import { ROSTER } from '@data/fighters';
 
 export type Validated<T> = { ok: true; value: T } | { ok: false; path: string; reason: string };
 
@@ -296,6 +297,31 @@ export function validateCareer(v: unknown, path = 'career'): Validated<CareerSta
   // A rank pointing outside the ladder crashes every screen that resolves it.
   if (career.playerRank < 1 || career.playerRank > career.ladder.length + 1) {
     return fail(`${path}.playerRank`, `rank ${career.playerRank} is outside a ladder of ${career.ladder.length}`);
+  }
+
+  /*
+   * Roster references.
+   *
+   * A save can outlive the content it points at: a fighter renamed or removed
+   * between builds leaves a career whose ladder references an id `getFighter`
+   * will throw on. That throw would happen on the opponent-selection screen,
+   * with no indication that the cause was a stale save rather than a bug.
+   *
+   * The offered-opponents list is repaired rather than rejected — it is
+   * regenerated every bout anyway, so a stale entry costs nothing to drop. A
+   * ladder entry is not repairable: it carries a record, and inventing a
+   * substitute fighter would fabricate career history.
+   */
+  const known = new Set(ROSTER.map((f) => f.id));
+  known.add(career.player.id);
+  for (const [i, entry] of career.ladder.entries()) {
+    if (!known.has(entry.fighterId)) {
+      return fail(`${path}.ladder[${i}].fighterId`, `"${entry.fighterId}" is not in this build's roster`);
+    }
+  }
+  career.offeredOpponents = career.offeredOpponents.filter((id) => known.has(id));
+  if (career.pendingChallenge !== null && !known.has(career.pendingChallenge.challengerId)) {
+    career.pendingChallenge = null;
   }
 
   return { ok: true, value: career };

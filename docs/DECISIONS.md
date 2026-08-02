@@ -99,7 +99,8 @@ came before, and the layered damage model did nothing.
 Rather than authoring or sourcing sprites and audio, fighters are drawn from a
 skeletal rig and every sound is synthesised with Web Audio. This makes
 provenance trivially complete, keeps the bundle at 395 kB gzipped, and means
-there is no binary media to trace. Trade-off: the art is geometric rather than
+there is no binary media in the shipped build to trace. (The repository does
+track QA screenshots as evidence; see the ledger.) Trade-off: the art is geometric rather than
 painterly. Documented as a known limitation.
 
 **D-017 — Draw rate is ~8%.**
@@ -178,3 +179,45 @@ release audit blocks on a missing manifest, an unknown commit or lockfile, and
 on a manifest whose commit does not appear in the bundle. It warns on a build
 made locally or from a dirty tree, because a release artifact should come from
 CI.
+
+**D-026 — A fixture stores its inputs, not a recipe for them.**
+The first golden fixture recorded checkpoint hashes but regenerated the command
+stream from `scriptedCommands()` at verification time. That couples the fixture
+to the generator: editing the generator silently changes what is being tested
+while the fixture still appears to pass, and the guard against it was a version
+constant somebody has to remember to bump. The commands are now committed —
+hex-packed, three characters per command, about 43 kB for 7200 ticks — and
+verification replays those bytes. The generator is kept only for recording, and
+a test reports when the two have parted company without treating that as a
+failure of the contract.
+
+**D-027 — Content digests separate a data edit from a model edit.**
+A fixture pins an outcome produced by a simulation *and* by a set of data. When
+a hash diverges, "the combat model changed" and "somebody adjusted a punch's
+reach" produce the identical failure, and the first place anyone looks is the
+wrong one. `contentHashes()` digests punches, fighters, mirror roster, AI
+profiles, rulesets and venues, and the fixture carries them.
+
+**D-028 — The release audit recomputes the artifact hash rather than reading it.**
+A manifest that merely *claims* a digest proves nothing; the whole point of the
+field is that a third party can check it, so the audit checks it — including
+that the file list matches the bundle on disk. `RELEASE=1` additionally promotes
+"built from a dirty tree" and "built locally" from warnings to blocking errors,
+so a developer is never obstructed and a release can never quietly ship from
+someone's laptop. CI runs the release-grade audit.
+
+**D-029 — The saved career is validated against the roster it references.**
+A save can outlive the content it points at. A ladder entry naming a fighter
+this build no longer has would throw from `getFighter` on the opponent screen,
+with nothing to indicate the cause was a stale save. Ladder references are now
+rejected at load with the failing path; stale *offered opponents* and a stale
+pending challenge are repaired instead, because those are regenerated every bout
+and dropping one costs nothing, while a ladder entry carries a record and
+substituting a fighter would fabricate career history.
+
+**D-030 — The limits of automated evidence are written down, not implied.**
+`docs/PLAYTEST_BRIEF.md` lists the questions this project cannot answer from
+inside itself, including the one the automation is least able to speak to:
+whether the career's decline phase lands as poignant or merely punishing. It
+also states the known limitations before a tester finds them — chiefly that no
+physical gamepad has ever been connected to this build.

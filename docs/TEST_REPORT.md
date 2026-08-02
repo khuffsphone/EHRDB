@@ -12,7 +12,7 @@ preserved verbatim in `artifacts/qa/verify/`.
 | typecheck — TypeScript strict, zero errors | PASS | 5.4s |
 | lint — ESLint, zero warnings | PASS | 5.3s |
 | content — content, generated assets, and documented-claim drift | PASS | 1.1s |
-| tests — 11 files, 167 tests | PASS | 111.7s |
+| tests — 11 files, 189 tests | PASS | 100.0s |
 | build — production bundle + build manifest | PASS | 13.2s |
 | release-audit — legal, provenance and build identity | PASS | 1.1s |
 | soak — 200 seeded AI-vs-AI bouts | PASS | 18.6s |
@@ -23,7 +23,7 @@ preserved verbatim in `artifacts/qa/verify/`.
 
 ## Unit and integration tests
 
-**167 passed, 0 failed, across 11 files.**
+**189 passed, 0 failed, across 11 files.**
 
 | Suite | Covers |
 |---|---|
@@ -35,9 +35,9 @@ preserved verbatim in `artifacts/qa/verify/`.
 | `tests/career/career.test.ts` | Creation validation, training curves, rank exchange both directions, purses, challenges, a complete career to a conclusion, ageing, grading, seed reproducibility |
 | `tests/save/save.test.ts` | v1→v4 migration without data loss, corrupt-save quarantine, backup recovery, export/import round-trip, hostile storage |
 | `tests/content/content.test.ts` | Roster, venue, ruleset, punch-table, AI-profile, binding and string integrity; no punch strictly dominates another; no reference to the historical work in any string |
-| `tests/sim/replay.test.ts` | Committed golden fixture: twelve checkpoint hashes over 7200 scripted ticks, two whole AI bouts; and hash completeness — the RNG stream position, the simulation-owned timers, the in-progress scorecard, and every field of `FighterState` perturbed in turn |
-| `tests/input/edges.test.ts` | An input edge reaches the simulation exactly once regardless of how many ticks a stalled frame catches up; level state still applies to all of them |
-| `tests/save/validate.test.ts` | Recursive save validation: malformed careers, ladders, ratings, RNG state, scorecards and legacy rows are rejected with the failing path; absent optional collections are defaulted; a valid career survives untouched |
+| `tests/sim/replay.test.ts` | Committed golden fixture: twelve checkpoint hashes over 7200 ticks replayed from the committed command stream, two whole AI bouts, and content digests that separate a data edit from a model edit; hash completeness — the RNG stream position, the simulation-owned timers, the in-progress scorecard, and every field of `FighterState` perturbed in turn; exhaustive command-codec round-trip |
+| `tests/input/edges.test.ts` | An input edge reaches the simulation exactly once at 1, 2, 3, 6, 12 and 60 ticks of catch-up; level state still applies to all of them; and the converse — reuse is observably wrong from three repeats on |
+| `tests/save/validate.test.ts` | Recursive save validation: malformed careers, ladders, ratings, RNG state, scorecards and legacy rows are rejected with the failing path; roster references checked; stale offers repaired; absent optional collections defaulted; a valid career survives untouched; exports carry build identity |
 
 ## Simulation balance — ranked roster (200 bouts)
 

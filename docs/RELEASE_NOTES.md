@@ -178,3 +178,54 @@ generation; it is an under-invested renderer — single-pose keyframes with
 linear blending, no secondary motion, no anticipation or follow-through, flat
 lighting, no impact deformation. Every one of those is a code change with zero
 provenance cost. Raising the generator's ceiling comes before buying art.
+
+## Second pass — against the unified integration playbook
+
+The master playbook specified the Code lane's deliverables more precisely than
+the original review did. Six of them were short of the mark and are now closed.
+
+**Edge regression at the named rates.** Tested at 1, 2, 3, 6, 12 and 60 ticks of
+catch-up, against the acceptance requirement of "no phantom edge inputs at
+catch-up rates from 1 to 60 ticks". Rates above `MAX_CATCHUP` are covered
+deliberately: the property belongs to the input contract, not to the current
+value of a scene constant.
+
+Measuring it produced a finding worth recording. The phantom appears from three
+repeats, not two — a two-tick burst buffers its second request, and for a jab
+the commitment outlasts `BUFFER_MAX_AGE`, so it expires unused. The defect's
+severity scales with how long the frame stalled, which is exactly backwards from
+what a player would want.
+
+**The fixture stores its inputs.** It previously regenerated the command stream
+from a generator at verification time, which couples the fixture to the
+generator: editing the generator silently changes what is tested. The normalised
+commands are now committed, hex-packed. The file also carries `formatVersion`,
+`tickRate`, the seed set, and `contentHashes` over punches, fighters, AI
+profiles, rulesets and venues — so a data edit and a combat-model edit no longer
+produce the same failure message.
+
+**The artifact hash is recomputed, not trusted.** `build-manifest.json` now
+carries a SHA-256 over every emitted file, and the release audit recalculates it
+and checks the file list against the bundle on disk. A manifest that merely
+claims a digest proves nothing.
+
+**Release-grade auditing.** Under `RELEASE=1`, "built from a dirty tree" and
+"built locally" stop being warnings and block. Development is never obstructed;
+a release can never quietly ship from a laptop. CI runs the release-grade audit
+and assembles the full evidence folder — artifact, manifest, verification
+summary, replay fixtures, screenshots, playtest brief, ledger, release notes —
+so the playable build never travels alone.
+
+**Build identity on Credits**, in full, alongside the short form on the title
+screen and the read-only `window.__TEN_COUNT__.build` hook.
+
+**Saves are checked against the content they reference.** A ladder entry naming
+a fighter this build no longer has is rejected at load with the failing path,
+rather than throwing from the opponent-selection screen. Stale offered opponents
+and pending challenges are repaired instead of rejected, because those are
+regenerated every bout while a ladder entry carries a record. Exports now record
+which build wrote them.
+
+**`docs/PLAYTEST_BRIEF.md`** — the questions automation cannot answer, written
+down rather than implied, including the known limitations stated before a tester
+finds them.

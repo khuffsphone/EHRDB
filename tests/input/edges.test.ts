@@ -128,13 +128,42 @@ describe('edge reuse across catch-up ticks', () => {
     expect(reused).toBeGreaterThan(consumed);
   });
 
-  it('is unaffected by how many ticks a frame catches up, once edges are consumed', () => {
-    // Same ticks, same press times, different frame grouping. With edges
-    // consumed after the first tick of a burst, the fighter throws exactly
-    // what was asked for no matter how badly the renderer stalls. That is the
-    // property the fix exists to guarantee.
-    for (const steps of [1, 2, 3, 4, 8]) {
-      expect(run(steps, false), `${steps} tick(s) of catch-up per frame`).toBe(EXPECTED_PRESSES);
-    }
+  /*
+   * The rates the unified playbook names, plus the acceptance-checklist
+   * requirement of "no phantom edge inputs at catch-up rates from 1 to 60
+   * ticks". `PRESS_EVERY_TICKS` is divisible by every one of them, so a press
+   * always lands on a frame boundary and the configurations stay comparable.
+   *
+   * Rates above `MAX_CATCHUP` (8) are beyond what BoutScene will actually run
+   * in one frame — it clamps and drops the accumulator instead. They are
+   * tested anyway: the property belongs to the input contract, not to the
+   * current value of a scene constant, and a later change to that constant
+   * must not be able to reintroduce the defect.
+   */
+  const CATCH_UP_RATES = [1, 2, 3, 6, 12, 60];
+
+  it.each(CATCH_UP_RATES)('issues exactly one punch per press at %i tick(s) of catch-up', (steps) => {
+    expect(run(steps, false)).toBe(EXPECTED_PRESSES);
   });
+
+  /*
+   * The converse, so the tests above cannot pass vacuously.
+   *
+   * The threshold is three, not two, and the reason is worth recording: a
+   * two-tick burst issues the press twice, but the second request arrives
+   * while the fighter is committed and is buffered — and for a jab the
+   * commitment outlasts `BUFFER_MAX_AGE`, so the buffered punch expires
+   * unused. From three repeats on, one of them lands inside the window and
+   * fires. The defect's severity scales with how long the frame stalled, which
+   * is exactly backwards from what a player would want.
+   *
+   * Two ticks producing no phantom is a property of the buffer window for one
+   * punch, not a reason the fix is unnecessary at that rate.
+   */
+  it.each(CATCH_UP_RATES.filter((s) => s >= 3))(
+    'reusing an edge produces phantom punches at %i ticks of catch-up',
+    (steps) => {
+      expect(run(steps, true)).toBeGreaterThan(EXPECTED_PRESSES);
+    },
+  );
 });

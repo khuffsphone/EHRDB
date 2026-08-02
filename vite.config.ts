@@ -2,7 +2,8 @@ import { defineConfig, type Plugin } from 'vite';
 import { fileURLToPath, URL } from 'node:url';
 import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { basename, join, relative, sep } from 'node:path';
 
 const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 
@@ -62,15 +63,51 @@ function buildIdentity(): BuildIdentity {
 
 const identity = buildIdentity();
 
-/** Writes the manifest once the bundle is on disk. */
+/**
+ * Writes the manifest once the bundle is on disk.
+ *
+ * `artifactHash` is a SHA-256 over every emitted file — path and content, in
+ * sorted order — so it identifies the release as a whole rather than one file
+ * of it. The build is multi-file (Phaser is code-split so it can be cached
+ * separately), so a single-file hash would silently ignore most of what ships.
+ * The manifest excludes itself, or it would have to contain its own digest.
+ */
 function buildManifest(): Plugin {
   return {
     name: 'ten-count-build-manifest',
     apply: 'build',
     closeBundle() {
+      const dist = r('./dist');
+      const walk = (dir: string): string[] =>
+        readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+          e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)],
+        );
+
+      const files = walk(dist)
+        .filter((f) => basename(f) !== 'build-manifest.json')
+        .map((f) => relative(dist, f).split(sep).join('/'))
+        .sort();
+
+      const whole = createHash('sha256');
+      for (const rel of files) {
+        whole.update(rel);
+        whole.update('\0');
+        whole.update(readFileSync(join(dist, rel)));
+        whole.update('\0');
+      }
+
       writeFileSync(
-        r('./dist/build-manifest.json'),
-        `${JSON.stringify({ name: 'ten-count', ...identity }, null, 2)}\n`,
+        join(dist, 'build-manifest.json'),
+        `${JSON.stringify(
+          {
+            name: 'ten-count',
+            ...identity,
+            files,
+            artifactHash: `sha256:${whole.digest('hex')}`,
+          },
+          null,
+          2,
+        )}\n`,
       );
     },
   };

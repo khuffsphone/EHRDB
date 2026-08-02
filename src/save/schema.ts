@@ -8,6 +8,7 @@
 import type { CareerState, LegacyRecord } from '@career/types';
 import type { DifficultyId } from '@ai/profiles';
 import { validateCareer, validateLegacy, validateSlots } from './validate';
+import { BUILD } from '@util/build-info';
 
 /** Current top-level save version. Bump whenever the shape changes. */
 export const SAVE_VERSION = 4;
@@ -245,6 +246,21 @@ function normalise(o: Record<string, unknown>): { ok: true; save: SaveFile } | {
   };
 }
 
+/**
+ * Serialises a save.
+ *
+ * `build` records which build wrote it: a save that came out of a specific
+ * artifact should say so, because the first question about a corrupt or
+ * unexpected save is which version produced it. It is metadata only — nothing
+ * reads it back, migrations key off `version`, and a save from an unknown
+ * build still loads.
+ */
 export function serialiseSave(save: SaveFile, timestamp: string): string {
-  return JSON.stringify({ ...save, magic: SAVE_MAGIC, version: SAVE_VERSION, savedAt: timestamp });
+  return JSON.stringify({
+    ...save,
+    magic: SAVE_MAGIC,
+    version: SAVE_VERSION,
+    savedAt: timestamp,
+    build: { version: BUILD.version, commit: BUILD.commitShort, ci: BUILD.ci },
+  });
 }
