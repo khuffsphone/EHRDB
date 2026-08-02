@@ -41,7 +41,7 @@ adapted, and the adaptation is stated rather than glossed.
 | Item | State |
 |---|---|
 | All required fixes from both review responses committed and independently verified | Done — verified by CI on a clean checkout, not only locally |
-| CI produces the only release artifact and manifest | Done — `RELEASE=1` audit blocks anything else |
+| CI produces the only release artifact and manifest | Done — `RELEASE=1` audit blocks anything else. `dirty` is computed over source, excluding the committed QA evidence that `npm run verify` rewrites as a side effect; the manifest records the scope and the audit blocks if it is missing (D-031). |
 | No phantom edge inputs at catch-up rates from 1 to 60 ticks | Done |
 | Committed replay fixtures reproduce across a clean checkout | Done in CI. **Not yet verified across browsers** — the fixture is exercised in Node; the browser smoke test does not replay it. |
 | Save reset, migration, backup and corrupt-data quarantine verified | Done |

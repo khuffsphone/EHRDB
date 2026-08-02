@@ -221,3 +221,21 @@ inside itself, including the one the automation is least able to speak to:
 whether the career's decline phase lands as poignant or merely punishing. It
 also states the known limitations before a tester finds them — chiefly that no
 physical gamepad has ever been connected to this build.
+
+**D-031 — "Dirty" means the source differs, not the evidence.**
+The release-grade audit (`RELEASE=1`) failed on its own first CI run, and the
+failure was correct behaviour from a wrong definition. `npm run verify` rewrites
+`artifacts/qa/**`, which is tracked, so by the time the `build` stage runs the
+working tree is dirty and every build — including the clean-checkout CI build
+the flag exists to identify — recorded `dirty: true`. The flag was not merely
+noisy; it was inverted for the only pipeline ordering that makes sense, which is
+to run the full gate before shipping what it certified.
+
+`dirty` now answers the question it was meant to: does the source that produced
+this artifact differ from the recorded commit? `artifacts/` is excluded because
+nothing under it is imported by `src/`, read by the build, or copied into
+`dist/`, so it cannot change the output. Everything else stays in scope. The
+manifest records `dirtyScope` alongside the flag, and the audit blocks on a
+manifest that omits it — a dirty flag whose scope is unrecorded cannot be
+interpreted, because nobody can tell whether "clean" means the source or merely
+some of it.

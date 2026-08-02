@@ -226,7 +226,16 @@ if (existsSync(DIST)) {
     const releaseMode = process.env.RELEASE === '1';
     const severity: Finding['severity'] = releaseMode ? 'block' : 'warn';
     if (manifest.dirty === true) {
-      findings.push({ severity, file: MANIFEST, message: 'built from a dirty working tree — not reproducible from the recorded commit' });
+      findings.push({
+        severity,
+        file: MANIFEST,
+        message: `built from a dirty working tree (${String(manifest.dirtyScope ?? 'scope unrecorded')}) — not reproducible from the recorded commit`,
+      });
+    }
+    if (typeof manifest.dirtyScope !== 'string') {
+      // A dirty flag whose scope is unrecorded cannot be interpreted: nobody
+      // can tell whether "clean" means the source or merely some of it.
+      findings.push({ severity: 'block', file: MANIFEST, message: 'build manifest does not record what "dirty" was computed over' });
     }
     if (manifest.ci === 'local') {
       findings.push({ severity, file: MANIFEST, message: 'built locally — a release artifact must come from CI' });

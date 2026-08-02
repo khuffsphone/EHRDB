@@ -11,11 +11,32 @@ interface BuildIdentity {
   commit: string;
   commitShort: string;
   dirty: boolean;
+  /** What `dirty` was computed over, so nobody assumes it is broader. */
+  dirtyScope: string;
   lockfileHash: string;
   builtAt: string;
   version: string;
   ci: string;
 }
+
+/**
+ * Paths excluded from the dirty check.
+ *
+ * `dirty` answers one question: does the source that produced this build differ
+ * from the recorded commit? `artifacts/` is committed QA evidence — verify
+ * logs, soak results, screenshots — and `npm run verify` rewrites it as a
+ * side effect of running. Nothing under it is imported by `src/`, read by the
+ * build, or copied into `dist/`, so it cannot change the artifact.
+ *
+ * Without this exclusion the flag was not merely noisy, it was inverted: any
+ * pipeline that runs the full gate before building — which is the only
+ * ordering that makes sense — would mark every build dirty, including the
+ * clean-checkout CI build the flag exists to distinguish.
+ *
+ * Everything else stays in scope: src, tools, tests, docs, index.html,
+ * package.json, package-lock.json and this file.
+ */
+const DIRT_EXCLUDED = ['artifacts'];
 
 /**
  * Build identity.
@@ -49,11 +70,15 @@ function buildIdentity(): BuildIdentity {
     // A missing lockfile is itself a provenance problem; the audit reports it.
   }
 
+  const excludes = DIRT_EXCLUDED.map((p) => `':(exclude)${p}'`).join(' ');
+  const dirtyScope = `tracked files excluding ${DIRT_EXCLUDED.join(', ')}`;
+
   const runId = process.env.GITHUB_RUN_ID;
   return {
     commit,
     commitShort: commit === 'unknown' ? 'unknown' : commit.slice(0, 8),
-    dirty: git('git status --porcelain', '') !== '',
+    dirty: git(`git status --porcelain -- . ${excludes}`, '') !== '',
+    dirtyScope,
     lockfileHash,
     builtAt: new Date().toISOString(),
     version: pkg.version ?? '0.0.0',
