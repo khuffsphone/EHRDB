@@ -26,6 +26,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
+    env:
+      # On a pull_request event GITHUB_SHA is the synthetic merge commit, which
+      # lives only on refs/pull/N/merge and cannot be resolved from an ordinary
+      # clone. Stamping an artifact with it produces provenance nobody can act
+      # on. Use the real head commit; fall back to github.sha for push events.
+      BUILD_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -67,7 +74,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: qa-evidence-${{ github.sha }}
+          name: qa-evidence-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             artifacts/qa/
           retention-days: 30
@@ -90,6 +97,6 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: ten-count-${{ github.sha }}
+          name: ten-count-${{ github.event.pull_request.head.sha || github.sha }}
           path: release/
           retention-days: 30

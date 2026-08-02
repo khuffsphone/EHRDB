@@ -60,7 +60,15 @@ function buildIdentity(): BuildIdentity {
     }
   };
 
-  const commit = process.env.GITHUB_SHA ?? git('git rev-parse HEAD', 'unknown');
+  /*
+   * `BUILD_COMMIT` wins over `GITHUB_SHA` because on a `pull_request` event
+   * GITHUB_SHA is the *merge* commit — a synthetic object on `refs/pull/N/merge`
+   * that no ordinary clone can resolve and that GitHub eventually collects. An
+   * artifact stamped with it names a commit nobody can check out, which is
+   * provenance that looks solid and is not. The workflow sets BUILD_COMMIT to
+   * the real head commit; see .github/workflows/verify.yml.
+   */
+  const commit = process.env.BUILD_COMMIT ?? process.env.GITHUB_SHA ?? git('git rev-parse HEAD', 'unknown');
   const pkg = JSON.parse(readFileSync(r('./package.json'), 'utf8')) as { version?: string };
 
   let lockfileHash = 'unknown';

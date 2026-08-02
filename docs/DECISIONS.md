@@ -239,3 +239,15 @@ manifest records `dirtyScope` alongside the flag, and the audit blocks on a
 manifest that omits it — a dirty flag whose scope is unrecorded cannot be
 interpreted, because nobody can tell whether "clean" means the source or merely
 some of it.
+
+**D-032 — A release artifact is stamped with a commit someone can check out.**
+On a `pull_request` event `GITHUB_SHA` is the synthetic merge commit: it lives
+only on `refs/pull/N/merge`, is unreachable from an ordinary clone, and is
+eventually collected. The first green CI run stamped a release candidate with
+one — `beed111a`, which `git cat-file` cannot resolve in this repository. The
+manifest looked complete and the provenance was unusable, which is the same
+failure shape as a gate that asserts a wider band than the claim it is cited to
+support. The build now prefers `BUILD_COMMIT`, and the workflow sets it to the
+pull request's head commit, falling back to `github.sha` for push events. The
+uploaded artifact names use the same SHA, so the evidence bundle and the commit
+agree.
