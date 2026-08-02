@@ -1,0 +1,46 @@
+{
+  "schema": "ehrdb-rom-palette-public-structure-v1",
+  "source_sha256": "b13f1e31bf6ba739e4cffd98374263b3421b3a61c4873e30dbc866198736e880",
+  "cram_word_rule": "(word & 0xF111) == 0",
+  "palette_sizes": {
+    "palette16_bytes": 32,
+    "full_cram64_bytes": 128
+  },
+  "staging_buffers": {
+    "source_or_current_hex": "0xFFF3A6",
+    "target_hex": "0xFFF426",
+    "interpolation_hex": "0xFFF4A6",
+    "status": "SUPPORTED_SEMANTIC; final VDP upload path unresolved"
+  },
+  "proofs": [
+    {"name":"copy_128_routine","offset_hex":"0x000BE0","length":10,"sha256":"ec4a1c408093eaf692aa6542dcf88ca156b91e1b51071cc76f5a15d4c26531f4","status":"MATCH"},
+    {"name":"palette_buffer_init","offset_hex":"0x000BC4","length":28,"sha256":"0d087ec5eaceeaab26f37bc7bb125726a577bfb4f2ac772be2a490f540fcf4d0","status":"MATCH"},
+    {"name":"single_palette_copy","offset_hex":"0x0026B8","length":18,"sha256":"7607defc879c45461d93a93bf60b2f07a2515b489f5c0e7ca563ab4e1faa2d2e","status":"MATCH"},
+    {"name":"copy_32_routine","offset_hex":"0x004B58","length":10,"sha256":"82eb2e33ffe02a516aaf6044755e2dbba7734e109653ec8e5a44d255773b7c81","status":"MATCH"},
+    {"name":"full_cram_dispatch","offset_hex":"0x00C048","length":56,"sha256":"6c9d94ac2f62035721a4932dd0fc39cd7058ab1374a1b925d0534d5b1b2bf58a","status":"MATCH"}
+  ],
+  "banks": [
+    {"start_hex":"0x009684","end_exclusive_hex":"0x0097E4","targets":["0x009684","0x009764"],"code_reference_count":3},
+    {"start_hex":"0x00C414","end_exclusive_hex":"0x00C694","targets":["0x00C414","0x00C494","0x00C514","0x00C594","0x00C614"],"code_reference_count":6},
+    {"start_hex":"0x02C592","end_exclusive_hex":"0x02C612","targets":["0x02C592","0x02C5D2"],"code_reference_count":4},
+    {"start_hex":"0x02D6EE","end_exclusive_hex":"0x02D7AE","targets":["0x02D6EE","0x02D72E"],"code_reference_count":2}
+  ],
+  "sources": [
+    {"offset_hex":"0x009684","references":[{"operand_offset_hex":"0x008670","kind":"LEA_ABS_LONG_A0"},{"operand_offset_hex":"0x008A6C","kind":"LEA_ABS_LONG_A0"}],"copy_bytes":128,"copy_method":"BSR.W to 0x000BE0","cram_valid_words":64,"copied_words":64,"all_copied_words_cram_valid":true,"copied_block_sha256":"ae089c12c2844ee61a871578fb287034b105bcdf9c97d21971f6bfb8d5cc82e7"},
+    {"offset_hex":"0x009764","references":[{"operand_offset_hex":"0x00823E","kind":"LEA_ABS_LONG_A0"}],"copy_bytes":128,"copy_method":"BSR.W to 0x000BE0","cram_valid_words":64,"copied_words":64,"all_copied_words_cram_valid":true,"copied_block_sha256":"892368530d05f63be8dc2d537c6d10aaad3f31b01f94c0a0cef84f6ef9a86aa1"},
+    {"offset_hex":"0x00C414","references":[{"operand_offset_hex":"0x00A5B2","kind":"LEA_ABS_LONG_A0"}],"copy_bytes":128,"copy_method":"JSR.W to 0x000BE0","cram_valid_words":64,"copied_words":64,"all_copied_words_cram_valid":true,"copied_block_sha256":"a76de08dbf5646faf4ac4f421a660408e98fbe4c685c7343cf3d008d9d8e4bba"},
+    {"offset_hex":"0x00C494","references":[{"operand_offset_hex":"0x00C04A","kind":"LEA_ABS_LONG_A0"}],"copy_bytes":128,"copy_method":"shared full-CRAM dispatch","cram_valid_words":64,"copied_words":64,"all_copied_words_cram_valid":true,"copied_block_sha256":"41763fa4a5b8d645b0f543b8dfa4713761bc6d3d726b6a21914ecb53c56d5f7d"},
+    {"offset_hex":"0x00C514","references":[{"operand_offset_hex":"0x00C068","kind":"LEA_ABS_LONG_A0"}],"copy_bytes":128,"copy_method":"shared full-CRAM dispatch","cram_valid_words":64,"copied_words":64,"all_copied_words_cram_valid":true,"copied_block_sha256":"cc0c2e4c7b2454323fb264b62d4b6edf32e330f776c96f0db6a8db1f08da77f0"},
+    {"offset_hex":"0x00C594","references":[{"operand_offset_hex":"0x00C070","kind":"LEA_ABS_LONG_A0"}],"copy_bytes":128,"copy_method":"shared full-CRAM dispatch","cram_valid_words":64,"copied_words":64,"all_copied_words_cram_valid":true,"copied_block_sha256":"f4e465cb656c255d52be6e52dbadf5bbfc3be84a04502a6eba9b8421aab2e92f"},
+    {"offset_hex":"0x00C614","references":[{"operand_offset_hex":"0x00A5FC","kind":"LEA_ABS_LONG_A0"},{"operand_offset_hex":"0x00C078","kind":"LEA_ABS_LONG_A0"}],"copy_bytes":128,"copy_method":"shared full-CRAM dispatch","cram_valid_words":64,"copied_words":64,"all_copied_words_cram_valid":true,"copied_block_sha256":"1fe82f267669f703bb0adb2bc40134c2c08269254664a1ef3e310e69591140e0"},
+    {"offset_hex":"0x02C592","references":[{"operand_offset_hex":"0x001B90","kind":"LEA_ABS_LONG_A0"},{"operand_offset_hex":"0x0026BE","kind":"LEA_ABS_LONG_A0"},{"operand_offset_hex":"0x004BA0","kind":"LEA_ABS_LONG_A0"}],"copy_bytes":32,"copy_method":"8-longword copy loop","cram_valid_words":16,"copied_words":16,"all_copied_words_cram_valid":true,"copied_block_sha256":"4bbb30160cd4eb529399479ad94eac63fed47bc4985f9694070e2e63ed3359ef"},
+    {"offset_hex":"0x02C5D2","references":[{"operand_offset_hex":"0x001BA6","kind":"LEA_ABS_LONG_A0"}],"copy_bytes":128,"copy_method":"BSR.W to 0x000BE0","cram_valid_words":49,"copied_words":64,"all_copied_words_cram_valid":false,"copied_block_sha256":"5b6cbf80c2bb00ef5dfc97d7d53609171a1785ce0bd4165a7a001a9730eefe4e"},
+    {"offset_hex":"0x02D6EE","references":[{"operand_offset_hex":"0x004BAC","kind":"LEA_ABS_LONG_A0"}],"copy_bytes":32,"copy_method":"BSR.S to 0x004B58","cram_valid_words":16,"copied_words":16,"all_copied_words_cram_valid":true,"copied_block_sha256":"21d68dcf48c5814ec6a8bdb856e54af0c8182dc28cd0811420e45162dacb72d0"},
+    {"offset_hex":"0x02D72E","references":[{"operand_offset_hex":"0x00A290","kind":"LEA_ABS_LONG_A0"}],"copy_bytes":128,"copy_method":"JMP.W to 0x000BE0","cram_valid_words":64,"copied_words":64,"all_copied_words_cram_valid":true,"copied_block_sha256":"c3abb1d5a70458db5f41b49b5eea8d939ce94c07a4d0cc9e295b2ccd77397db0"}
+  ],
+  "semantic_limits": [
+    "No original color words or RGB values are included.",
+    "Only absolute-long references are enumerated; PC-relative and computed references remain open.",
+    "The 0x02C5D2 copied block is mixed and is not classified as a complete CRAM set."
+  ]
+}
