@@ -146,6 +146,9 @@ function buildManifest(): Plugin {
   };
 }
 
+/** Selects the single-file playtest variant. See `build.outDir` below. */
+const SINGLE_FILE = process.env.SINGLE_FILE === '1';
+
 export default defineConfig({
   base: './',
   plugins: [buildManifest()],
@@ -176,14 +179,24 @@ export default defineConfig({
   },
   build: {
     target: 'es2022',
-    outDir: 'dist',
+    /*
+     * `SINGLE_FILE=1` builds the playtest variant: one chunk instead of two, in
+     * its own output directory, so `tools/single-file.ts` can inline it into a
+     * standalone HTML file a tester can open from a download or a link.
+     *
+     * It is deliberately a separate output. The release artifact stays
+     * code-split — Phaser is a stable 1.5 MB that should cache independently of
+     * the 180 kB that actually changes — and `dist/build-manifest.json` keeps
+     * describing the thing the audit hashes. A playtest build is a convenience
+     * copy, not a release candidate, and nothing downstream should mistake it
+     * for one.
+     */
+    outDir: SINGLE_FILE ? 'dist-single' : 'dist',
     assetsDir: 'assets',
     sourcemap: false,
     chunkSizeWarningLimit: 1600,
     rollupOptions: {
-      output: {
-        manualChunks: { phaser: ['phaser'] },
-      },
+      output: SINGLE_FILE ? { inlineDynamicImports: true } : { manualChunks: { phaser: ['phaser'] } },
     },
   },
   server: { port: 5173, strictPort: true },

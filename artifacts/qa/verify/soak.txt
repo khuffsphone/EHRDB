@@ -1,7 +1,7 @@
 $ npx tsx tools/soak.ts --bouts 200 --json artifacts/qa/soak.json
 
 
-AI SOAK — 200 bouts at difficulty "contender" (12.9s)
+AI SOAK — 200 bouts at difficulty "contender" (11.6s)
 
   outcomes      KO 63  TKO 13  decision 121  draw 3
   mean rounds   5.04

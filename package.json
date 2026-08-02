@@ -23,6 +23,7 @@
     "career:sim": "tsx tools/career-sim.ts",
     "assets:validate": "tsx tools/validate-content.ts",
     "fixture:replay": "tsx tools/replay-fixture.ts",
+    "playtest:build": "tsx tools/single-file.ts",
     "balance:tune": "tsx tools/balance-tune.ts",
     "balance:certify": "tsx tools/soak.ts --certify",
     "release:audit": "tsx tools/release-audit.ts",

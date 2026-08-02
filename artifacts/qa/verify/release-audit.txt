@@ -3,7 +3,7 @@ $ npx tsx tools/release-audit.ts
   · tracked binary media: 85, all with a ledger row: true
   · derived-data rules: 4, tracked text files clean: true
   · bundle scanned: 4 files, 0 binary media
-  · build identity: 015284c1 lockfile 0a0ec05b ci local artifact e7b96e1a50ec
+  · build identity: 4462d3ea lockfile 0a0ec05b ci local artifact 806de52b0bf0
   · no ROM data, no reference-work terms, no private paths, no unfinished markers on a release path
 release audit passed (2 warning(s))
   warn  dist/build-manifest.json: built from a dirty working tree (tracked files excluding artifacts) — not reproducible from the recorded commit

@@ -1,5 +1,24 @@
 # Playtest Brief
 
+## Getting the build in front of someone
+
+`npm run playtest:build` writes a single self-contained HTML file to
+`artifacts/playtest/ten-count-<commit>.html`. No server, no install, no network
+— it opens from a download, a link or a USB stick. The filename carries the
+commit so a tester's report can be tied to a revision.
+
+**It needs a keyboard.** There is no touch input in `src/`; the game is keyboard
+and gamepad only. It renders correctly on a phone — `Phaser.Scale.FIT` letterboxes
+the fixed 640×360 view — and cannot be operated there without a paired keyboard
+or controller. Do not hand this to a tester who only has a phone; they will see
+a title screen they cannot get past, and that is a wasted session rather than a
+finding.
+
+That file is a convenience copy, **not a release artifact**. The release build
+stays code-split and is the one `dist/build-manifest.json` describes and
+`npm run release:audit` recomputes.
+
+
 **Build:** see `dist/build-manifest.json` in the candidate. Every claim below is
 about that exact artifact; if the manifest says `"ci": "local"` this is not a
 candidate and should not be used for a session.
