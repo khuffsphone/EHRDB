@@ -292,3 +292,72 @@ display formatter. One concrete defect: the embedded manifest declares version
 in it, so the artifact cannot say which release it is. Same class as this
 project's `f11d4d6`. Nothing about presentation quality, test count or source
 depth is settled by inspecting a minified bundle, and the document says so.
+
+**D-035 — The audit detects ROM-derived data by shape, not only ROMs by file
+identity.**
+Named by the Cowork lane's boundary work, verified here, and real. Every ROM
+check in `tools/release-audit.ts` keyed on the contamination arriving as a
+*file* — a prohibited extension, or a size-gated hash against the verified
+research ROM — and the reference-work check keyed on it arriving as a *word*. A
+measured colour set pasted into a `.ts` array is neither. It is a list of
+numbers: no extension, no size signature, no hash to match. So the most likely
+contamination route by a distance — somebody being helpful — passed every gate,
+and the build would have looked clean while carrying extracted content into a
+release that calls itself clean-room.
+
+This is the third time this audit's header has stated a guarantee more strongly
+than the thing enforcing it. The header has said "ROM-derived data" since it was
+written.
+
+`tools/contamination-rules.ts` keys on shapes this project's own code cannot
+produce: colour packed as 9-bit words (this project stores 24-bit hex),
+exception-vector addresses written as 24-bit literals (colour black is the only
+legitimate literal of that shape and is exempt), a bare run of 64+ byte-ranged
+values (content here is named fields validated by schema), and the hardware
+vocabulary that travels with a paste, matched so underscore-joined identifiers
+are caught as well as prose.
+
+Narrowness is the design constraint, adopted from the same source: a rule that
+cries wolf gets switched off, and a switched-off rule protects nothing. A bare
+`68000` is deliberately not a rule — a purse could be that number.
+
+Two severities. A data *shape* blocks anywhere in the repository, because D-033
+already established that the repository and not just the bundle has to be clean.
+*Vocabulary* blocks on a release path only: documentation is allowed to discuss
+the reference material, and the game is not. Two files are exempt — the rules
+and their controls — and their sample values are synthetic, authored here.
+
+Eleven controls in `tests/legal/contamination.test.ts` prove each rule fires and
+that the set stays silent across every tracked shipping file, plus a control
+that fails if a rule is ever added without one. The gate was then run against a
+planted palette in `src/data/` and blocked, which is the only evidence that it
+works.
+
+**D-036 — The research-to-build fact channel exists, is defined, and has never
+been used. That is the correct state, and it is now recorded rather than
+assumed.**
+Cowork's boundary document defines the only permitted way for a fact about the
+historical work to reach the shipping build: the question is written down before
+it is asked, what returns is prose rather than a table, it is recorded as
+measured-elsewhere with a pointer to the lane that measured it, and the
+implementation is written from the fact rather than from the artifact. The
+record shows no such entry, because no such exchange has happened.
+
+`docs/SOURCE_MAP.md` already states the consequence per rule: no rule in this
+project is labelled MEASURED against the original. Every MEASURED row names a
+command that measured *this* simulation. The ROM was deliberately never
+retrieved (D-002).
+
+One distinction the channel description does not yet draw, and should. This
+project has a fourth category already in use: VERIFIED_SOURCE, grounded in the
+research report, which itself cites the original's published manual. Reading a
+document a rights-holder published is not measuring a ROM, and it does not need
+the measurement channel — but it is also not a design decision, and collapsing
+the two would lose real provenance. The map keeps them separate and labels every
+rule with which one it came from.
+
+If the research lane's queued combat measurement is meant to inform this build's
+timing or pacing, it has to arrive through the measurement channel, in prose, or
+the provenance record stops being complete. Nothing has arrived. Until something
+does, every number in this game is a design decision, a published-source fact,
+or a measurement of the game's own behaviour.

@@ -16,6 +16,7 @@ import { execSync } from 'node:child_process';
 import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
 import { extname, join, sep } from 'node:path';
 import { createHash } from 'node:crypto';
+import { CONTAMINATION_RULES, scanForDerivedData } from './contamination-rules';
 
 interface Finding {
   severity: 'block' | 'warn';
@@ -156,6 +157,53 @@ if (existsSync(LEDGER_PATH)) {
   }
   console.log(`  · tracked binary media: ${trackedMedia.length}, all with a ledger row: ${unledgered.length === 0}`);
 }
+
+// --- 1c. No ROM-derived data in tracked source -----------------------------
+//
+// The header of this file has claimed "ROM-derived data" since it was written.
+// Nothing enforced it. Section 1 detects a ROM by extension, by size-gated
+// hash, and section 2 detects the reference work by name — all three key on the
+// contamination arriving either as a file or as a word. A measured colour set
+// pasted into a `.ts` array is neither: it is a list of numbers, and numbers
+// have no extension, no size signature and no hash to match.
+//
+// That is the third time this audit has stated a guarantee more strongly than
+// the thing enforcing it. The rules live in `tools/contamination-rules.ts` with
+// their own controls, deliberately free of any dependency on the rest of this
+// repository so they can be ported if the canonical repository is not this one.
+//
+// Two severities, because the two kinds of hit mean different things:
+//
+//   - A *data shape* — a packed palette, vector addresses, a bare byte run —
+//     blocks anywhere in the repository. The ledger check already established
+//     that the repository, not just the bundle, is what has to be clean.
+//   - *Vocabulary* blocks on a release path only. Documentation is allowed to
+//     discuss the reference material; the game is not.
+
+const CONTAMINATION_EXEMPT = new Set([
+  // The rules themselves, and the controls that prove each one fires. The
+  // control samples are synthetic values authored here, not measured ones.
+  'tools/contamination-rules.ts',
+  'tests/legal/contamination.test.ts',
+]);
+
+for (const file of tracked()) {
+  if (!isText(file) || CONTAMINATION_EXEMPT.has(file)) continue;
+  if (!existsSync(file)) continue;
+  for (const hit of scanForDerivedData(readFileSync(file, 'utf8'))) {
+    const vocabularyOnly = hit.rule === 'hardware-vocabulary';
+    if (vocabularyOnly && !isRelease(file)) continue;
+    findings.push({
+      severity: 'block',
+      file,
+      message: `possible ROM-derived data: ${hit.label} (${hit.count})`,
+    });
+  }
+}
+
+console.log(`  · derived-data rules: ${CONTAMINATION_RULES.length}, tracked text files clean: ${
+  findings.every((f) => !f.message.startsWith('possible ROM-derived data'))
+}`);
 
 // --- 2. Release code carries no reference to the historical work ------------
 

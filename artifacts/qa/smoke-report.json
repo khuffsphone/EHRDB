@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-08-02T11:38:28.561Z",
+  "ranAt": "2026-08-02T16:50:42.031Z",
   "steps": [
     {
       "step": "boots to the title screen",
@@ -39,7 +39,7 @@
     {
       "step": "the bout resolves to a result",
       "ok": true,
-      "detail": "scene Result"
+      "detail": "scene Training"
     },
     {
       "step": "advances to training camp",
@@ -49,7 +49,7 @@
     {
       "step": "persists the career to storage",
       "ok": true,
-      "detail": "4297 bytes"
+      "detail": "4155 bytes"
     },
     {
       "step": "offers to continue the saved career after reload",

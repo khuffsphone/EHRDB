@@ -90,6 +90,38 @@ retrieved, never downloaded, never opened and never measured**. Its SHA-256 is
 recorded in `tools/release-audit.ts` purely so the audit can refuse to track
 any file matching it.
 
+### ROM-derived data, which is a different problem
+
+A ROM is a file. **Derived data is not.** A measured colour set pasted into a
+source array is a list of numbers — no extension, no size signature, no hash to
+match — so every check above would have passed it, and the build would have
+looked clean while carrying extracted content. Given that a parallel research
+lane holds exactly that class of artefact, this was the cheapest critical risk on
+the board, and this ledger claimed a protection it did not have.
+
+`tools/contamination-rules.ts` now keys on the *shape* of the data: colour packed
+as 9-bit hardware words, exception-vector addresses as 24-bit literals, bare runs
+of 64 or more byte-ranged values, and the hardware vocabulary that travels with a
+paste. Every rule has a control proving it fires, the set has a control proving
+it stays silent across every shipping file, and the gate was run against a
+planted palette before it was believed. See D-035.
+
+### How a fact about the historical work may reach this build
+
+There is exactly one permitted route, and it has never been used: the question is
+written down before it is asked, what comes back is prose rather than a table, it
+is recorded as measured-elsewhere naming the lane that measured it, and the
+implementation is written from the fact rather than from the artefact.
+
+Reading the original's **published manual**, via the research report, is a
+separate and permitted route — that is what the VERIFIED_SOURCE label in
+`docs/SOURCE_MAP.md` records. It is not measurement and does not use the channel
+above.
+
+Every number in this game is therefore one of three things: a design decision, a
+fact from a published source, or a measurement of this simulation's own
+behaviour. `docs/SOURCE_MAP.md` labels which, per rule. See D-036.
+
 ## Reference material
 
 Research material staged during development lives under `references/drive/`,

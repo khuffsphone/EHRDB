@@ -67,6 +67,27 @@ about presentation quality, the 453-test claim or source depth — a minified
 bundle cannot answer those, and the document says so rather than implying
 otherwise.
 
+## Received from another lane and acted on
+
+The Cowork lane's master update (2 August 2026) named a gap in its own legal
+audit: ROM detection keyed on the artefact being a *file*, so derived data —
+a palette pasted into a source array — passed every gate. That finding applies
+here verbatim and was verified rather than assumed.
+
+| Item | State |
+|---|---|
+| Derived-data contamination rules | **Done** — `tools/contamination-rules.ts`, four rules keyed on shape, blocking. Verified against a planted palette in `src/data/`, not just asserted (D-035) |
+| Controls proving each rule fires and the set stays silent | **Done** — `tests/legal/contamination.test.ts`, 11 controls, including one that fails if a rule is added without a control |
+| Research-to-build fact channel | **Defined, never used.** That is the correct state and is now recorded rather than assumed (D-036) |
+
+On the channel: `docs/SOURCE_MAP.md` labels every material rule, and no rule in
+this project is labelled MEASURED against the original. One distinction the
+channel description does not draw and should — this project already uses a
+fourth category, VERIFIED_SOURCE, for facts from the original's *published
+manual* via the research report. Reading a published document is not measuring a
+ROM and does not need the measurement channel, but it is also not a design
+decision, and collapsing the two would lose real provenance.
+
 ## Explicitly not in this lane
 
 Canonical-repository selection, the full symmetric two-repository audit, and the
