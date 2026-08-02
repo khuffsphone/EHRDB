@@ -58,9 +58,18 @@ The last five are the top gate, and no amount of engineering closes them. They
 are listed here so that "every gate is green" is never mistaken for "the game
 works" — the exact failure this whole remediation exists to correct.
 
+## Symmetric audit — what the artifact alone supports
+
+The supplied `heavyweightcircuitv1.1.0.html` has now been inspected first-hand;
+see `docs/HWC_INSPECTION.md`. It confirms Cowork's build-stamping claim from the
+artifact itself and records one concrete identity defect. It settles nothing
+about presentation quality, the 453-test claim or source depth — a minified
+bundle cannot answer those, and the document says so rather than implying
+otherwise.
+
 ## Explicitly not in this lane
 
-Canonical-repository selection, the symmetric two-repository audit, and the
+Canonical-repository selection, the full symmetric two-repository audit, and the
 subsystem scorecard all require Cowork's source archive, which is not present.
 EHRDB remains the *provisional* integration host on the playbook's own terms:
 it is the only inspectable source available, not the winner of a comparison.

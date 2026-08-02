@@ -1,71 +1,71 @@
 {
-  "ranAt": "2026-08-02T03:52:48.147Z",
+  "ranAt": "2026-08-02T11:38:28.602Z",
   "node": "v22.22.2",
   "results": [
     {
       "stage": "typecheck",
       "ok": true,
-      "seconds": 4.7,
+      "seconds": 3.6,
       "required": true
     },
     {
       "stage": "lint",
       "ok": true,
-      "seconds": 3.6,
+      "seconds": 3.2,
       "required": true
     },
     {
       "stage": "content",
       "ok": true,
-      "seconds": 0.8,
+      "seconds": 0.7,
       "required": true
     },
     {
       "stage": "tests",
       "ok": true,
-      "seconds": 100,
+      "seconds": 76.6,
       "required": true
     },
     {
       "stage": "build",
       "ok": true,
-      "seconds": 13,
+      "seconds": 9.4,
       "required": true
     },
     {
       "stage": "release-audit",
       "ok": true,
-      "seconds": 0.9,
+      "seconds": 0.8,
       "required": true
     },
     {
       "stage": "soak",
       "ok": true,
-      "seconds": 17.5,
+      "seconds": 13.7,
       "required": true
     },
     {
       "stage": "soak-mirror",
       "ok": true,
-      "seconds": 14.9,
+      "seconds": 12.5,
       "required": true
     },
     {
       "stage": "balance-certify",
       "ok": true,
-      "seconds": 90.6,
+      "seconds": 67,
       "required": true
     },
     {
       "stage": "career-sim",
       "ok": true,
-      "seconds": 23.1,
+      "seconds": 15.2,
       "required": true
     },
     {
       "stage": "smoke",
       "ok": true,
-      "seconds": 216.9,
+      "seconds": 162.6,
       "required": true
     }
   ],

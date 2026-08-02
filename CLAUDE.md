@@ -23,9 +23,10 @@ are git-ignored and must never be imported from `src/`.
 Every binary media file needs a row in `docs/LEGAL_AND_ASSET_LEDGER.md`.
 **The production bundle contains none** — all art is drawn by code and all audio
 is synthesised at runtime. Keep it that way unless there is a very good reason
-not to. The repository does track 85 QA screenshots under `artifacts/qa/screens/`,
-which have a ledger row; an earlier version of this paragraph said there were
-none anywhere, which was false.
+not to. The repository does track 85 PNGs — 84 QA screen captures under
+`artifacts/qa/screens/` plus one ring-geometry diagnostic — each covered by a
+ledger row and enforced by `release:audit`. An earlier version of this
+paragraph said there were none anywhere, which was false.
 
 `npm run release:audit` enforces all of the above. It must stay green.
 

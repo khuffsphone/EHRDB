@@ -53,6 +53,9 @@ const FORBIDDEN_TERMS: { label: string; pattern: RegExp }[] = [
   { label: 'greatest heavyweights', pattern: /\bgreatest\s+heavyweights\b/i },
 ];
 
+/** The provenance record every tracked media file must appear in. */
+const LEDGER_PATH = 'docs/LEGAL_AND_ASSET_LEDGER.md';
+
 /** Paths that hold private research material and must never be imported. */
 const PRIVATE_PATHS = ['references/private-rom', 'artifacts/private-repro', 'references/drive'];
 
@@ -91,6 +94,67 @@ for (const file of tracked()) {
       findings.push({ severity: 'block', file, message: 'matches the verified research ROM hash' });
     }
   }
+}
+
+// --- 1b. Every tracked binary media file has a ledger row -------------------
+//
+// The header above has always claimed this check existed. It did not: the only
+// media check ran over `dist/`, and only as a warning. So the repository could
+// accumulate tracked images with no provenance entry while the audit reported
+// success — a guarantee stated more strongly than the thing enforcing it.
+//
+// This matters beyond tidiness. The research lane's palette scanner can render
+// actual historical colour values as PNG swatches. It writes them to
+// `artifacts/private-repro/`, which is git-ignored, and that is the correct
+// design — but a git-ignore is a convention and this is a gate. A palette dump
+// is explicitly forbidden under SAFE_RELEASE, so the repository, not just the
+// bundle, has to be checked.
+
+const MEDIA_EXTENSIONS = new Set([
+  '.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.tif', '.tiff',
+  '.mp3', '.ogg', '.wav', '.m4a', '.flac',
+  '.woff', '.woff2', '.ttf', '.otf',
+  '.mp4', '.webm', '.mov',
+]);
+
+if (existsSync(LEDGER_PATH)) {
+  const ledgerText = readFileSync(LEDGER_PATH, 'utf8');
+
+  /*
+   * Coverage is by declared prefix, not by substring.
+   *
+   * The obvious implementation — walk the file's ancestors and ask whether the
+   * ledger text mentions each one — is wrong, and wrong in the direction that
+   * makes the gate useless. A row naming `artifacts/qa/screens/` contains the
+   * substring `artifacts/qa/`, so an ancestor walk grants coverage to the whole
+   * of `artifacts/qa/`, and by the same argument to every ancestor up to the
+   * repository root. The first version of this check did exactly that and
+   * cheerfully passed a planted file. Caught by testing it rather than
+   * asserting it.
+   *
+   * So: take the paths the ledger actually declares — backticked tokens that
+   * look like repository paths — and require the file to sit under one of them.
+   */
+  const declared = [...ledgerText.matchAll(/`([A-Za-z0-9_./-]+)`/g)]
+    .map((m) => m[1])
+    .filter((p) => p.includes('/'));
+
+  const covered = (file: string): boolean =>
+    declared.some((d) => (d.endsWith('/') ? file.startsWith(d) : file === d));
+
+  const trackedMedia = tracked().filter((f) => MEDIA_EXTENSIONS.has(extname(f).toLowerCase()));
+  const unledgered = trackedMedia.filter((f) => !covered(f));
+  for (const file of unledgered.slice(0, 10)) {
+    findings.push({ severity: 'block', file, message: 'tracked binary media with no row in the asset ledger' });
+  }
+  if (unledgered.length > 10) {
+    findings.push({
+      severity: 'block',
+      file: LEDGER_PATH,
+      message: `${unledgered.length - 10} further tracked media file(s) with no ledger row`,
+    });
+  }
+  console.log(`  · tracked binary media: ${trackedMedia.length}, all with a ledger row: ${unledgered.length === 0}`);
 }
 
 // --- 2. Release code carries no reference to the historical work ------------
@@ -260,7 +324,7 @@ if (existsSync(DIST)) {
 
 // --- 5. The ledger exists, names the profile, and is complete --------------
 
-const LEDGER = 'docs/LEGAL_AND_ASSET_LEDGER.md';
+const LEDGER = LEDGER_PATH;
 if (!existsSync(LEDGER)) {
   findings.push({ severity: 'block', file: LEDGER, message: 'asset ledger is missing' });
 } else {

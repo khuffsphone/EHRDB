@@ -251,3 +251,44 @@ support. The build now prefers `BUILD_COMMIT`, and the workflow sets it to the
 pull request's head commit, falling back to `github.sha` for push events. The
 uploaded artifact names use the same SHA, so the evidence bundle and the commit
 agree.
+
+**D-033 — The audit enumerates tracked media against declared paths.**
+The audit header had always listed "binary media with no row in the asset
+ledger" as one of its checks. That check did not exist: the only media scan ran
+over `dist/`, and only as a warning, so the repository could accumulate tracked
+images with no provenance entry while the audit reported success. A stated
+guarantee stronger than the thing enforcing it — the same defect this project
+has now corrected in four separate places.
+
+It matters concretely because the research lane's palette scanner can render
+historical colour values as PNG swatches. It writes them to the git-ignored
+`artifacts/private-repro/`, which is the right design, but a git-ignore is a
+convention and this is a gate; a palette dump is forbidden outright under
+SAFE_RELEASE.
+
+The first implementation was wrong in the direction that makes a gate useless.
+It walked each file's ancestors and asked whether the ledger mentioned any of
+them, so a row naming `artifacts/qa/screens/` — which contains the substring
+`artifacts/qa/` — granted coverage to that whole directory and, by the same
+argument, to every ancestor up to the repository root. It passed a planted file.
+Coverage is now by declared prefix: the paths the ledger actually names in
+backticks, and the file must sit under one. Caught by testing the gate against a
+planted file rather than trusting that it worked.
+
+On its first correct run it found a real violation: `artifacts/qa/ring-check.png`
+was tracked with no covering row, and the ledger's claim that all 85 PNGs sat
+under `artifacts/qa/screens/` was wrong — 84 do. Third time a claim about those
+85 files has been inaccurate, and the first time anything checked.
+
+**D-034 — Heavyweight Circuit was inspected first-hand, within the limits of a
+compiled artifact.**
+The independent review and this project's response both reasoned about
+Heavyweight Circuit without anyone here having opened it; the response said so
+explicitly. `docs/HWC_INSPECTION.md` records what the supplied v1.1.0 artifact
+verifies about itself. Cowork's claimed build stamping is real — commit,
+build time, lockfile digest and version are embedded, with a sane fallback and a
+display formatter. One concrete defect: the embedded manifest declares version
+`1.0.0` while the file is named `v1.1.0`, and the string `1.1.0` appears nowhere
+in it, so the artifact cannot say which release it is. Same class as this
+project's `f11d4d6`. Nothing about presentation quality, test count or source
+depth is settled by inspecting a minified bundle, and the document says so.

@@ -36,7 +36,8 @@ during research, and takes no expression from it.
 | All player-facing text | `src/ui/strings.ts` | This project | Project licence | 2026-08-01 | Unrestricted | Final |
 | Typography | System monospace stack (`ui-monospace`, DejaVu Sans Mono, Menlo, Consolas) | Operating system | Not redistributed | n/a | Referenced by name only | Final — no font file is bundled |
 | Phaser 3 | npm `phaser@3.90.0` | Phaser Studio | MIT | 2026-08-01 | Redistribution permitted | Final |
-| QA screenshots (85 PNG, `artifacts/qa/screens/`) | Captured by `npm run qa:screens` from this project's own renderer | This project | Project licence | 2026-08-02 | Unrestricted | Final — evidence only, never copied into `dist/` |
+| QA screen captures (84 PNG, `artifacts/qa/screens/`) | Captured by `npm run qa:screens` from this project's own renderer, 28 screens x 3 viewports | This project | Project licence | 2026-08-02 | Unrestricted | Final — evidence only, never copied into `dist/` |
+| Ring geometry diagnostic (`artifacts/qa/ring-check.png`) | Single capture from this project's own renderer during the ring-projection fix | This project | Project licence | 2026-08-02 | Unrestricted | Final — evidence only, never copied into `dist/` |
 
 **There are zero binary media files in the production bundle.** Every pixel is
 drawn by code at runtime and every sound is synthesised at runtime. This is the
@@ -44,13 +45,23 @@ reason the provenance table above is short and complete: nothing ships that
 needs tracing.
 
 The repository is a different matter, and an earlier version of this paragraph
-claimed otherwise. It tracks **85 PNG files**, all of them QA screenshots under
-`artifacts/qa/screens/` — output of `npm run qa:screens`, committed as visual
-evidence. They are produced by this project from this project's own rendering
-code, they are covered by the "generated at runtime" rows above, and Vite never
-copies them into `dist/`. But they are binary media in the repository, and a
-ledger whose entire purpose is provenance accuracy does not get to round that
-down to zero.
+claimed otherwise. It tracks **85 PNG files**: 84 screen captures under `artifacts/qa/screens/`
+(28 screens at three viewports, output of `npm run qa:screens`) plus
+`artifacts/qa/ring-check.png`, a single diagnostic from the ring-projection
+work. All are committed as visual evidence.
+
+All of them are produced by this project from this project's own rendering code,
+and Vite never copies them into `dist/`. But they are binary media in the
+repository, and a ledger whose entire purpose is provenance accuracy does not
+get to round that down to zero.
+
+The 84/1 split matters more than it looks. Two earlier versions of this
+paragraph said all 85 sat under `artifacts/qa/screens/`. They did not — one is a
+loose ring-geometry diagnostic — and nothing checked, because the audit's media
+check only ever looked at `dist/`, and only as a warning. It now enumerates
+every tracked media file against the paths this ledger actually declares and
+blocks on any file no row covers. The stray diagnostic was found by that gate on
+its first run.
 
 Verified by `npm run release:audit`, which reports the binary-media count in
 `dist/` (currently 0) and fails the build if that number rises without a
