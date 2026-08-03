@@ -106,11 +106,30 @@ const identity = buildIdentity();
  * The manifest excludes itself, or it would have to contain its own digest.
  */
 function buildManifest(): Plugin {
+  /*
+   * The output directory is read from the resolved config, not hardcoded.
+   *
+   * It used to be `r('./dist')`. That was harmless while there was only one
+   * build, and became a defect the moment a second one existed: the single-file
+   * playtest build writes to `dist-single/`, but the manifest plugin still
+   * walked and rewrote `dist/` — stamping the release manifest with a fresh
+   * commit over a stale file list and hash. A manifest attesting to bytes it
+   * had not read is worse than no manifest.
+   *
+   * Caught by `npm run release:audit`, which recomputes the hash and checks the
+   * recorded commit actually appears in the bundle, rather than trusting the
+   * manifest. That check exists precisely because this class of defect is
+   * invisible to everything else.
+   */
+  let outDir = r('./dist');
   return {
     name: 'ten-count-build-manifest',
     apply: 'build',
+    configResolved(config) {
+      outDir = r(`./${config.build.outDir}`);
+    },
     closeBundle() {
-      const dist = r('./dist');
+      const dist = outDir;
       const walk = (dir: string): string[] =>
         readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
           e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)],

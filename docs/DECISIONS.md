@@ -361,3 +361,22 @@ timing or pacing, it has to arrive through the measurement channel, in prose, or
 the provenance record stops being complete. Nothing has arrived. Until something
 does, every number in this game is a design decision, a published-source fact,
 or a measurement of the game's own behaviour.
+
+**D-037 — The build manifest follows the output directory it actually wrote.**
+The manifest plugin hardcoded `dist`. That was harmless while there was one
+build and became a defect the moment there were two: the single-file playtest
+build emits to `dist-single/`, but the plugin still walked and rewrote `dist/`,
+stamping the *release* manifest with a fresh commit over a stale file list and
+artifact hash. A manifest attesting to bytes it had not read is worse than no
+manifest — it is the same failure as `f11d4d6` and the HWC version defect,
+where the identity field looked complete and was unusable.
+
+Caught by `npm run release:audit`, which recomputes the hash and checks that the
+recorded commit appears in the bundle rather than trusting the manifest. It
+blocked on the first build after the playtest feature landed. That check was
+added on the principle that a manifest which attests to itself attests to
+nothing; this is the first time it caught something the author had not
+anticipated.
+
+Now read from `configResolved`, so each build describes its own output. The two
+manifests are independent and the playtest build cannot touch the release one.

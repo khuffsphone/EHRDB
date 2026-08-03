@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-08-02T21:00:48.364Z",
+  "ranAt": "2026-08-03T01:45:21.152Z",
   "steps": [
     {
       "step": "boots to the title screen",
@@ -49,7 +49,7 @@
     {
       "step": "persists the career to storage",
       "ok": true,
-      "detail": "4108 bytes"
+      "detail": "4106 bytes"
     },
     {
       "step": "offers to continue the saved career after reload",

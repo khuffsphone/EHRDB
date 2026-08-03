@@ -9,7 +9,7 @@ $ npx tsx tools/qa-smoke.ts
   ok    enters the ring
   ok    the bout resolves to a result — scene Training
   ok    advances to training camp
-  ok    persists the career to storage — 4108 bytes
+  ok    persists the career to storage — 4106 bytes
   ok    offers to continue the saved career after reload — focus "Continue Career"
   ok    reloads straight back into the career — scene Training
 
