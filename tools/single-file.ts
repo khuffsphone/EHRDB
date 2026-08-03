@@ -120,6 +120,16 @@ const bodyPath = join(OUT_DIR, `${name}.body.html`);
 writeFileSync(standalonePath, standalone);
 writeFileSync(bodyPath, bodyForm);
 
+/*
+ * Stable-named copies alongside the commit-stamped ones. A hosted review link
+ * has to keep its URL across rebuilds or every new build is a new link to
+ * redistribute, and a UAT reviewer ends up testing whichever one they happened
+ * to bookmark. The commit-stamped files remain the record; these are the moving
+ * pointer, and the build identity is inside the bundle either way.
+ */
+writeFileSync(join(OUT_DIR, 'ten-count-playtest.html'), standalone);
+writeFileSync(join(OUT_DIR, 'ten-count-playtest.body.html'), bodyForm);
+
 const digest = createHash('sha256').update(readFileSync(standalonePath)).digest('hex');
 const size = statSync(standalonePath).size;
 
