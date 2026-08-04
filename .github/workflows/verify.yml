@@ -4,7 +4,7 @@
 # the exact lockfile. A green badge on this workflow is the only evidence of
 # correctness that does not depend on trusting a local machine's output.
 #
-# Release artifacts are produced *only* by this workflow. A build carrying
+# Release artifacts are produced *only* by the Linux verify job. A build carrying
 # `"ci": "local"` in its manifest did not come through here.
 name: verify
 
@@ -100,4 +100,57 @@ jobs:
         with:
           name: ten-count-${{ github.event.pull_request.head.sha || github.sha }}
           path: release/
+          retention-days: 30
+
+  # The affected operator machine is Windows and has NODE_ENV=production set
+  # user-wide. This job reproduces both environmental conditions deliberately.
+  # It is a tooling regression gate, not a second release-artifact producer.
+  windows-tooling:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      NODE_ENV: production
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # Intentionally no command-line --include flag: this proves the committed
+      # .npmrc protects a plain operator `npm ci` from user-wide NODE_ENV.
+      - name: Install with NODE_ENV production
+        run: npm ci
+
+      - name: Test launcher and install contracts
+        run: npm test -- tests/tools/package-manager.test.ts tests/tools/install-contract.test.ts
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright browser
+        run: npx playwright install chromium
+
+      - name: Run browser smoke through Windows child processes
+        run: npm run qa:smoke
+
+      - name: Run screenshot capture through Windows child processes
+        run: npm run qa:screens
+
+      - name: Upload Windows tooling evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-tooling-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            artifacts/qa/smoke-report.json
+            artifacts/qa/screens-report.json
+            artifacts/qa/screens/
           retention-days: 30
