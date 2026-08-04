@@ -47,9 +47,10 @@ jobs:
 
       # `npm ci` rather than `npm install`: the lockfile is part of the build
       # identity, and a resolved-differently dependency tree is a different
-      # build even when the source is identical.
+      # build even when the source is identical. `--include=dev` is explicit so
+      # a runner-level NODE_ENV=production cannot silently omit the toolchain.
       - name: Install
-        run: npm ci
+        run: npm ci --include=dev
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
