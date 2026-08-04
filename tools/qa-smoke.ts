@@ -11,6 +11,7 @@ import { chromium, type ConsoleMessage, type Page } from 'playwright';
 import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { npmRunScript } from './package-manager';
 
 const PORT = 4174;
 const URL = `http://localhost:${PORT}/`;
@@ -25,8 +26,14 @@ function record(step: string, ok: boolean, detail = ''): void {
 
 async function startServer(): Promise<ChildProcess> {
   if (!existsSync('dist/index.html')) throw new Error('dist/ is missing — run `npm run build` first.');
-  const proc = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], { stdio: 'ignore' });
+  const launch = npmRunScript('preview:qa', ['--port', String(PORT), '--strictPort']);
+  const proc = spawn(launch.command, launch.args, { stdio: 'ignore' });
+  let launchError: Error | undefined;
+  proc.once('error', (error) => {
+    launchError = error;
+  });
   for (let i = 0; i < 80; i++) {
+    if (launchError) throw new Error(`preview server failed to launch: ${launchError.message}`);
     try {
       if ((await fetch(URL)).ok) return proc;
     } catch {
@@ -34,7 +41,7 @@ async function startServer(): Promise<ChildProcess> {
     }
     await sleep(250);
   }
-  throw new Error('preview server did not start');
+  throw new Error(`preview server did not start: ${launch.display}`);
 }
 
 const scene = (p: Page) =>
@@ -119,7 +126,10 @@ async function main(): Promise<void> {
     await sleep(2600);
     record('enters the ring', (await scene(page)) === 'Bout');
 
-    // Fight it out.
+    // Fight it out. Do not inject Confirm during the bout. The default recovery
+    // modes already resolve knockdowns, while an Enter edge delivered on the
+    // transition tick can correctly advance the Result screen before the
+    // harness observes it. That was a test-driver defect, not a game failure.
     for (let i = 0; i < 400 && (await scene(page)) === 'Bout'; i++) {
       await page.keyboard.down('KeyD');
       await sleep(90);
@@ -131,8 +141,6 @@ async function main(): Promise<void> {
         await sleep(170);
         await page.keyboard.up('Space');
       }
-      // Recovery input, in case we are on the canvas.
-      if (i % 2 === 0) await tap(page, 'Enter', 1, 40);
     }
     const resolved = await waitForScene(page, 'Result', 8000);
     record('the bout resolves to a result', resolved, `scene ${await scene(page)}`);

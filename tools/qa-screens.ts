@@ -15,6 +15,7 @@ import { chromium, type Browser, type Page, type ConsoleMessage } from 'playwrig
 import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { npmRunScript } from './package-manager';
 
 const OUT = 'artifacts/qa/screens';
 const PORT = 4173;
@@ -38,8 +39,14 @@ const visited = new Set<string>();
 
 async function startServer(): Promise<ChildProcess> {
   if (!existsSync('dist/index.html')) throw new Error('dist/ is missing — run `npm run build` first.');
-  const proc = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], { stdio: 'ignore' });
+  const launch = npmRunScript('preview:qa', ['--port', String(PORT), '--strictPort']);
+  const proc = spawn(launch.command, launch.args, { stdio: 'ignore' });
+  let launchError: Error | undefined;
+  proc.once('error', (error) => {
+    launchError = error;
+  });
   for (let i = 0; i < 80; i++) {
+    if (launchError) throw new Error(`preview server failed to launch: ${launchError.message}`);
     try {
       if ((await fetch(URL)).ok) return proc;
     } catch {
@@ -47,7 +54,7 @@ async function startServer(): Promise<ChildProcess> {
     }
     await sleep(250);
   }
-  throw new Error('preview server did not start');
+  throw new Error(`preview server did not start: ${launch.display}`);
 }
 
 async function focusLabel(page: Page): Promise<string> {
