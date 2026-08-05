@@ -1,0 +1,229 @@
+name: EHRDB voice audition remote generation
+
+on:
+  pull_request:
+    types: [opened]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ehrdb-voice-audition-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+
+    steps:
+      - name: Check out exchange branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Create ephemeral RSA keypair
+        id: keypair
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out "$RUNNER_TEMP/voice-private.pem" 2>/dev/null
+          openssl pkey -in "$RUNNER_TEMP/voice-private.pem" -pubout -out "$RUNNER_TEMP/voice-public.pem"
+          echo "run_id=${GITHUB_RUN_ID}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish public key for one-time key exchange
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice-public-key-${{ github.run_id }}
+          path: ${{ runner.temp }}/voice-public.pem
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Wait for encrypted ElevenLabs key and generate audition build
+        shell: bash
+        env:
+          HEAD_BRANCH: ${{ github.head_ref }}
+          BUNDLE_FILE_ID: 172p1A-RkOGnEkFFycYSwUVKBwaRqGdWe
+        run: |
+          set -euo pipefail
+          cleanup() {
+            rm -f "$RUNNER_TEMP/voice-private.pem" "$RUNNER_TEMP/voice-key.enc" "$RUNNER_TEMP/voice-key.txt"
+          }
+          trap cleanup EXIT
+
+          echo "Waiting for voice-exchange/key.enc.b64 on ${HEAD_BRANCH}."
+          found=0
+          for attempt in $(seq 1 120); do
+            git fetch --quiet origin "${HEAD_BRANCH}" --depth=1
+            if git show FETCH_HEAD:voice-exchange/key.enc.b64 > "$RUNNER_TEMP/key.enc.b64" 2>/dev/null; then
+              found=1
+              break
+            fi
+            sleep 10
+          done
+          if [ "$found" -ne 1 ]; then
+            echo "Encrypted key did not arrive within 20 minutes." >&2
+            exit 4
+          fi
+
+          base64 --decode "$RUNNER_TEMP/key.enc.b64" > "$RUNNER_TEMP/voice-key.enc"
+          openssl pkeyutl -decrypt \
+            -inkey "$RUNNER_TEMP/voice-private.pem" \
+            -in "$RUNNER_TEMP/voice-key.enc" \
+            -out "$RUNNER_TEMP/voice-key.txt" \
+            -pkeyopt rsa_padding_mode:oaep \
+            -pkeyopt rsa_oaep_md:sha256
+          ELEVENLABS_API_KEY="$(tr -d '\r\n' < "$RUNNER_TEMP/voice-key.txt")"
+          if [ ${#ELEVENLABS_API_KEY} -lt 20 ]; then
+            echo "Decrypted key is invalid." >&2
+            exit 3
+          fi
+          echo "::add-mask::${ELEVENLABS_API_KEY}"
+
+          mkdir -p "$RUNNER_TEMP/source"
+          curl --fail --location --retry 4 --retry-all-errors \
+            "https://drive.usercontent.google.com/download?id=${BUNDLE_FILE_ID}&export=download&confirm=t" \
+            --output "$RUNNER_TEMP/source/ehrdb.bundle"
+          test "$(stat -c '%s' "$RUNNER_TEMP/source/ehrdb.bundle")" -gt 20000000
+
+          mkdir -p work
+          cd work
+          git init -q
+          git fetch -q "$RUNNER_TEMP/source/ehrdb.bundle" \
+            refs/heads/voice/large-audition-pack:refs/remotes/bundle/voice-large-audition
+          git switch -q -c voice/large-audition-pack refs/remotes/bundle/voice-large-audition
+
+          unset NODE_ENV
+          npm ci --include=dev
+
+          mkdir -p artifacts/voice-audition
+          ./node_modules/.bin/tsx tools/assets/build-voice-sample.ts > artifacts/voice-audition/voice-sample-jobs.json
+
+          ELEVENLABS_API_KEY="$ELEVENLABS_API_KEY" node --input-type=module <<'NODE'
+          import { writeFile } from 'node:fs/promises';
+          const key = process.env.ELEVENLABS_API_KEY;
+          const res = await fetch('https://api.elevenlabs.io/v1/user/subscription', {
+            headers: { 'xi-api-key': key },
+          });
+          if (!res.ok) throw new Error(`subscription probe ${res.status} ${(await res.text()).slice(0, 160)}`);
+          const x = await res.json();
+          const safe = {
+            retrievedAt: new Date().toISOString(),
+            tier: x.tier ?? null,
+            status: x.status ?? null,
+            characterCount: x.character_count ?? null,
+            characterLimit: x.character_limit ?? null,
+            canExtendCharacterLimit: x.can_extend_character_limit ?? null,
+          };
+          await writeFile('artifacts/voice-audition/subscription-before.json', `${JSON.stringify(safe, null, 2)}\n`);
+          NODE
+
+          ELEVENLABS_API_KEY="$ELEVENLABS_API_KEY" node tools/assets/gen-audio-pack.mjs \
+            artifacts/voice-audition/voice-sample-jobs.json \
+            --out artifacts/voice-audition \
+            --output-format mp3_44100_128
+
+          clip_count="$(find artifacts/voice-audition/voice -maxdepth 1 -type f -name '*.mp3' | wc -l | tr -d ' ')"
+          if [ "$clip_count" -ne 84 ]; then
+            echo "Expected 84 MP3 clips, found ${clip_count}." >&2
+            exit 2
+          fi
+
+          npm run typecheck
+          npm run lint
+          npm test
+          npm run build:single
+          cp dist-single/heavyweight-circuit-v1.1.9.html artifacts/voice-audition/game.html
+
+          python3 - <<'PY'
+          import json, pathlib, subprocess, hashlib
+          root = pathlib.Path('artifacts/voice-audition')
+          manifest = json.loads((root/'voice/manifest.json').read_text())
+          provenance = json.loads((root/'voice/PROVENANCE.json').read_text())
+          clips = sorted((root/'voice').glob('*.mp3'))
+          errors = []
+          durations = {}
+          for p in clips:
+              proc = subprocess.run(
+                  ['ffprobe','-v','error','-show_entries','format=duration','-of','default=noprint_wrappers=1:nokey=1',str(p)],
+                  capture_output=True,text=True,
+              )
+              if proc.returncode:
+                  errors.append({'file':p.name,'error':proc.stderr.strip()})
+                  continue
+              durations[p.name] = round(float(proc.stdout.strip()), 3)
+          report = {
+              'profile':'large-audition-v1',
+              'generatedClips':len(clips),
+              'manifestClips':len(manifest.get('clips',{})),
+              'provenanceRows':len(provenance),
+              'decodeErrors':errors,
+              'durationSeconds':durations,
+              'gameSha256':hashlib.sha256((root/'game.html').read_bytes()).hexdigest(),
+          }
+          (root/'VOICE_GENERATION_REPORT.json').write_text(json.dumps(report,indent=2)+'\n')
+          if len(clips) != 84 or len(manifest.get('clips',{})) != 84 or len(provenance) != 84 or errors:
+              raise SystemExit('voice pack validation failed')
+          PY
+
+          npx playwright install --with-deps chromium
+          node tools/static-server.mjs artifacts/voice-audition 8099 > "$RUNNER_TEMP/voice-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true; cleanup' EXIT
+          sleep 2
+          node tools/assets/verify-voice-pack.mjs \
+            --url=http://127.0.0.1:8099/game.html \
+            --wait=30000 | tee artifacts/voice-audition/BROWSER_VOICE_VERIFY.txt
+          kill "$server_pid" 2>/dev/null || true
+          trap cleanup EXIT
+
+          ELEVENLABS_API_KEY="$ELEVENLABS_API_KEY" node --input-type=module <<'NODE'
+          import { writeFile } from 'node:fs/promises';
+          const key = process.env.ELEVENLABS_API_KEY;
+          const res = await fetch('https://api.elevenlabs.io/v1/user/subscription', {
+            headers: { 'xi-api-key': key },
+          });
+          if (!res.ok) throw new Error(`subscription probe ${res.status}`);
+          const x = await res.json();
+          const safe = {
+            retrievedAt: new Date().toISOString(),
+            tier: x.tier ?? null,
+            status: x.status ?? null,
+            characterCount: x.character_count ?? null,
+            characterLimit: x.character_limit ?? null,
+            canExtendCharacterLimit: x.can_extend_character_limit ?? null,
+          };
+          await writeFile('artifacts/voice-audition/subscription-after.json', `${JSON.stringify(safe, null, 2)}\n`);
+          NODE
+
+          cat > artifacts/voice-audition/README.txt <<'TXT'
+          HEAVYWEIGHT CIRCUIT — LARGE VOICE AUDITION v1
+
+          Open game.html through a local HTTP server, not file://, so the optional
+          voice/manifest.json and MP3 clips can be fetched. Voice is off by default;
+          enable it in Settings. This is an 84-clip audition pack, not release-cast
+          approval. The existing voices are stock audition voices.
+          TXT
+
+          cd artifacts
+          zip -qr ehrdb-voice-audition-84.zip voice-audition
+
+      - name: Upload playable voice audition
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ehrdb-voice-audition-84-${{ github.run_id }}
+          path: |
+            work/artifacts/ehrdb-voice-audition-84.zip
+            work/artifacts/voice-audition/
+          retention-days: 7
+          if-no-files-found: error
