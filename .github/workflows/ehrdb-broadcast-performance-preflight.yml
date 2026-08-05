@@ -1,0 +1,57 @@
+name: EHRDB broadcast performance v3 preflight
+
+on:
+  pull_request:
+    types: [opened]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Download private source bundle
+        shell: bash
+        env:
+          BUNDLE_FILE_ID: 1_pMzP_NCNYnYJkpX_PNwLCF2HoRg1ldf
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/source"
+          curl --fail --location --retry 4 --retry-all-errors \
+            "https://drive.usercontent.google.com/download?id=${BUNDLE_FILE_ID}&export=download&confirm=t" \
+            --output "$RUNNER_TEMP/source/ehrdb.bundle"
+          test "$(stat -c '%s' "$RUNNER_TEMP/source/ehrdb.bundle")" -gt 20000000
+          mkdir work
+          cd work
+          git init -q
+          git fetch -q "$RUNNER_TEMP/source/ehrdb.bundle" \
+            refs/heads/voice/broadcast-performance-v3:refs/remotes/bundle/broadcast-performance-v3
+          git switch -q -c voice/broadcast-performance-v3 refs/remotes/bundle/broadcast-performance-v3
+
+      - name: Validate without spending voice credits
+        working-directory: work
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_ENV
+          npm ci --include=dev
+          npm run typecheck
+          npm run lint
+          npm test
+          npm run build:single
+          node --check tools/assets/generate-broadcast-performance-v3.mjs
+          node --check tools/assets/verify-broadcast-performance-v3.mjs
+          bash -n tools/assets/remote-broadcast-performance-v3.sh
