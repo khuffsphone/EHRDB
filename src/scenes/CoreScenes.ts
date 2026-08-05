@@ -9,6 +9,7 @@ import { UI } from '@art/palettes';
 import { drawBoxer, POSES } from '@art/boxer';
 import { money, record, t } from '@ui/strings';
 import { CAREER_RULES } from '@career/types';
+import { BUILD, buildLabel } from '@util/build-info';
 import type { InputSnapshot } from '@input/manager';
 
 /** Creates shared services and hands off to the title. */
@@ -76,6 +77,13 @@ export class TitleScene extends BaseScene {
       colour: UI.textDim,
       align: 'center',
     });
+    // Build identity, so a player reporting a bug and a developer reproducing
+    // it are provably talking about the same bytes.
+    label(this, VIEW.width - 6, VIEW.height - 10, buildLabel(), {
+      size: 6,
+      colour: UI.textDim,
+      align: 'right',
+    }).setOrigin(1, 0);
     this.cameras.main.fadeIn(300, 0, 0, 0);
   }
 
@@ -188,6 +196,24 @@ export class CreditsScene extends BaseScene {
     this.paintBackground('credits.title');
     panel(this, 60, 42, 520, 268);
     label(this, 80, 62, t('credits.body'), { size: 9, colour: UI.text, wrap: 480 });
+
+    /*
+     * Build identity, in full, on the screen a player is most likely to be
+     * looking at when they file a bug. The short form is on the title screen;
+     * this is the version a report can be reconciled against — the same values
+     * `dist/build-manifest.json` carries, and the same ones the read-only
+     * `window.__TEN_COUNT__.build` hook exposes.
+     */
+    const lines = [
+      `Version ${BUILD.version}`,
+      `Commit ${BUILD.commitShort}${BUILD.dirty ? ' (modified working tree)' : ''}`,
+      `Lockfile ${BUILD.lockfileHash}`,
+      `Built ${BUILD.builtAt.slice(0, 19).replace('T', ' ')} UTC · ${BUILD.ci}`,
+    ];
+    lines.forEach((line, i) => {
+      label(this, 80, 268 + i * 11, line, { size: 7, colour: UI.textDim });
+    });
+
     this.showFooter('Backspace  Back');
   }
 

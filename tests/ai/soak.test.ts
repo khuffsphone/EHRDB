@@ -8,6 +8,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { runSoak, type SoakReport } from '../../tools/soak';
+import { BALANCE_TARGETS } from '../../tools/balance-targets';
 import { MIRROR_ARCHETYPES } from '@data/mirror';
 import type { ArchetypeId, PunchId } from '@sim/types';
 
@@ -101,19 +102,54 @@ describe('AI soak', () => {
   }, 300_000);
 
   it('keeps every archetype competitive when ratings are held equal', async () => {
-    // The balance target: with identical fighters, no archetype should be
-    // dominant or hopeless purely because of how it fights.
-    const report = await soak(200, 'contender', 63_000, true, 40);
+    /*
+     * The balance target, at the sample size where the target means something.
+     *
+     * This assertion used to be 20–80% while every document claimed 40–60%.
+     * The gate that was cited as proving the claim had four times the slack of
+     * the claim, so the two drifted for the entire project without anything
+     * failing. Both numbers now come from BALANCE_TARGETS, and this test runs
+     * the iteration sample against the widened band; the full documented band
+     * is certified at `certifySize` by the `soak-mirror-certify` stage of
+     * `npm run verify`, which is the run the documentation may cite.
+     *
+     * The widening is not a fudge, it is arithmetic: at `iterationSize` each
+     * archetype contests roughly 80 bouts, and a win rate over 80 bouts has a
+     * standard error near 5.6%. Asserting ±10 points on that sample would fail
+     * on seed choice alone even from a perfectly balanced model.
+     */
+    const t = BALANCE_TARGETS;
+    const report = await soak(t.iterationSize, 'contender', 63_000, true, 40);
     expect(report.failures).toEqual([]);
     expect(report.archetypes.length).toBe(MIRROR_ARCHETYPES.length);
 
     for (const a of report.archetypes) {
       const winRate = a.wins / Math.max(1, a.bouts);
-      expect(winRate, `${a.archetype} win rate ${(winRate * 100).toFixed(0)}%`).toBeGreaterThan(0.2);
-      expect(winRate, `${a.archetype} win rate ${(winRate * 100).toFixed(0)}%`).toBeLessThan(0.8);
+      const where = `${a.archetype} win rate ${(winRate * 100).toFixed(1)}% over ${a.bouts} bouts`;
+      expect(winRate, where).toBeGreaterThanOrEqual(t.iterationBand.min);
+      expect(winRate, where).toBeLessThanOrEqual(t.iterationBand.max);
       // And every archetype has to actually throw punches.
       expect(a.thrown / Math.max(1, a.bouts), `${a.archetype} volume`).toBeGreaterThan(40);
     }
+  }, 300_000);
+
+  it('hits the documented accuracy, pacing and stoppage targets', async () => {
+    // The other three quantitative claims in CLAUDE.md, asserted rather than
+    // asserted-about. Same source of truth as the archetype band.
+    const t = BALANCE_TARGETS;
+    const report = await soak(t.iterationSize, 'contender', 66_000, true, 40);
+    expect(report.failures).toEqual([]);
+
+    const accuracy = report.meanLandPercent / 100;
+    expect(accuracy, `accuracy ${report.meanLandPercent.toFixed(1)}%`).toBeGreaterThanOrEqual(t.accuracy.min);
+    expect(accuracy, `accuracy ${report.meanLandPercent.toFixed(1)}%`).toBeLessThanOrEqual(t.accuracy.max);
+
+    expect(report.meanRounds, `mean rounds ${report.meanRounds.toFixed(2)}`).toBeGreaterThanOrEqual(t.meanRounds.min);
+    expect(report.meanRounds, `mean rounds ${report.meanRounds.toFixed(2)}`).toBeLessThanOrEqual(t.meanRounds.max);
+
+    const stoppages = (report.outcomes.ko + report.outcomes.tko) / Math.max(1, report.bouts);
+    expect(stoppages, `stoppage rate ${(stoppages * 100).toFixed(1)}%`).toBeGreaterThanOrEqual(t.stoppageRate.min);
+    expect(stoppages, `stoppage rate ${(stoppages * 100).toFixed(1)}%`).toBeLessThanOrEqual(t.stoppageRate.max);
   }, 300_000);
 
   it('produces reproducible results across identical runs', () => {

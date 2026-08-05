@@ -20,7 +20,7 @@ import { AiController } from '@ai/controller';
 import { DIFFICULTIES } from '@ai/profiles';
 import { getPunch } from '@data/punches';
 import { emptyCommand, TICK_RATE, type BoutEvent, type FighterCommand, type PunchId } from '@sim/types';
-import type { InputSnapshot } from '@input/manager';
+import { levelOnly, type InputSnapshot } from '@input/manager';
 import { Menu, VIEW, label, panel } from '@ui/kit';
 import { UI } from '@art/palettes';
 import { t } from '@ui/strings';
@@ -201,10 +201,17 @@ export class BoutScene extends BaseScene {
     const dt = Math.min(this.game.loop.delta, 250);
     this.accumulator += dt;
     let steps = 0;
+    // An edge belongs to exactly one simulation tick. A frame that runs long
+    // enough to need catch-up would otherwise feed the same press to two or
+    // three ticks, and the repeats land inside the input buffer window as
+    // punches the player never asked for. Level state (held) still applies to
+    // every tick, because holding a direction genuinely does mean all of them.
+    let tickInput = s;
     while (this.accumulator >= STEP_MS && steps < MAX_CATCHUP && !this.sim.isComplete) {
       this.accumulator -= STEP_MS;
       steps++;
-      this.step(s);
+      this.step(tickInput);
+      if (tickInput === s) tickInput = levelOnly(s);
     }
     // A long stall must not leave the simulation permanently behind.
     if (steps >= MAX_CATCHUP) this.accumulator = 0;

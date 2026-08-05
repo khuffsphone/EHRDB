@@ -36,14 +36,36 @@ during research, and takes no expression from it.
 | All player-facing text | `src/ui/strings.ts` | This project | Project licence | 2026-08-01 | Unrestricted | Final |
 | Typography | System monospace stack (`ui-monospace`, DejaVu Sans Mono, Menlo, Consolas) | Operating system | Not redistributed | n/a | Referenced by name only | Final — no font file is bundled |
 | Phaser 3 | npm `phaser@3.90.0` | Phaser Studio | MIT | 2026-08-01 | Redistribution permitted | Final |
+| QA screen captures (84 PNG, `artifacts/qa/screens/`) | Captured by `npm run qa:screens` from this project's own renderer, 28 screens x 3 viewports | This project | Project licence | 2026-08-02 | Unrestricted | Final — evidence only, never copied into `dist/` |
+| Ring geometry diagnostic (`artifacts/qa/ring-check.png`) | Single capture from this project's own renderer during the ring-projection fix | This project | Project licence | 2026-08-02 | Unrestricted | Final — evidence only, never copied into `dist/` |
 
-**There are zero binary media files in this repository and zero in the
-production bundle.** Every pixel is drawn by code at runtime and every sound is
-synthesised at runtime. This is the reason the provenance table above is short
-and complete: there is nothing to trace.
+**There are zero binary media files in the production bundle.** Every pixel is
+drawn by code at runtime and every sound is synthesised at runtime. This is the
+reason the provenance table above is short and complete: nothing ships that
+needs tracing.
+
+The repository is a different matter, and an earlier version of this paragraph
+claimed otherwise. It tracks **85 PNG files**: 84 screen captures under `artifacts/qa/screens/`
+(28 screens at three viewports, output of `npm run qa:screens`) plus
+`artifacts/qa/ring-check.png`, a single diagnostic from the ring-projection
+work. All are committed as visual evidence.
+
+All of them are produced by this project from this project's own rendering code,
+and Vite never copies them into `dist/`. But they are binary media in the
+repository, and a ledger whose entire purpose is provenance accuracy does not
+get to round that down to zero.
+
+The 84/1 split matters more than it looks. Two earlier versions of this
+paragraph said all 85 sat under `artifacts/qa/screens/`. They did not — one is a
+loose ring-geometry diagnostic — and nothing checked, because the audit's media
+check only ever looked at `dist/`, and only as a warning. It now enumerates
+every tracked media file against the paths this ledger actually declares and
+blocks on any file no row covers. The stray diagnostic was found by that gate on
+its first run.
 
 Verified by `npm run release:audit`, which reports the binary-media count in
-`dist/` (currently 0).
+`dist/` (currently 0) and fails the build if that number rises without a
+matching row in the table above.
 
 ## Build-time dependencies
 
@@ -67,6 +89,38 @@ The verified research ROM described in the source manifest was **never
 retrieved, never downloaded, never opened and never measured**. Its SHA-256 is
 recorded in `tools/release-audit.ts` purely so the audit can refuse to track
 any file matching it.
+
+### ROM-derived data, which is a different problem
+
+A ROM is a file. **Derived data is not.** A measured colour set pasted into a
+source array is a list of numbers — no extension, no size signature, no hash to
+match — so every check above would have passed it, and the build would have
+looked clean while carrying extracted content. Given that a parallel research
+lane holds exactly that class of artefact, this was the cheapest critical risk on
+the board, and this ledger claimed a protection it did not have.
+
+`tools/contamination-rules.ts` now keys on the *shape* of the data: colour packed
+as 9-bit hardware words, exception-vector addresses as 24-bit literals, bare runs
+of 64 or more byte-ranged values, and the hardware vocabulary that travels with a
+paste. Every rule has a control proving it fires, the set has a control proving
+it stays silent across every shipping file, and the gate was run against a
+planted palette before it was believed. See D-035.
+
+### How a fact about the historical work may reach this build
+
+There is exactly one permitted route, and it has never been used: the question is
+written down before it is asked, what comes back is prose rather than a table, it
+is recorded as measured-elsewhere naming the lane that measured it, and the
+implementation is written from the fact rather than from the artefact.
+
+Reading the original's **published manual**, via the research report, is a
+separate and permitted route — that is what the VERIFIED_SOURCE label in
+`docs/SOURCE_MAP.md` records. It is not measurement and does not use the channel
+above.
+
+Every number in this game is therefore one of three things: a design decision, a
+fact from a published source, or a measurement of this simulation's own
+behaviour. `docs/SOURCE_MAP.md` labels which, per rule. See D-036.
 
 ## Reference material
 

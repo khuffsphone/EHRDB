@@ -1,0 +1,156 @@
+# Independent verification.
+#
+# Everything in docs/ACCEPTANCE_TESTS.md runs here, on a clean checkout, with
+# the exact lockfile. A green badge on this workflow is the only evidence of
+# correctness that does not depend on trusting a local machine's output.
+#
+# Release artifacts are produced *only* by the Linux verify job. A build carrying
+# `"ci": "local"` in its manifest did not come through here.
+name: verify
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    env:
+      # On a pull_request event GITHUB_SHA is the synthetic merge commit, which
+      # lives only on refs/pull/N/merge and cannot be resolved from an ordinary
+      # clone. Stamping an artifact with it produces provenance nobody can act
+      # on. Use the real head commit; fall back to github.sha for push events.
+      BUILD_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The build manifest records the commit; a shallow clone still needs
+          # the ref itself, and `git status` must be able to run.
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # `npm ci` rather than `npm install`: the lockfile is part of the build
+      # identity, and a resolved-differently dependency tree is a different
+      # build even when the source is identical. `--include=dev` is explicit so
+      # a runner-level NODE_ENV=production cannot silently omit the toolchain.
+      - name: Install
+        run: npm ci --include=dev
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify
+        run: npm run verify
+
+      # The release-grade audit. `RELEASE=1` promotes "built from a dirty tree"
+      # and "built locally" from warnings to blocking errors, so the artifact
+      # this job publishes cannot have come from anywhere but this checkout.
+      - name: Certify the release artifact
+        run: RELEASE=1 npx tsx tools/release-audit.ts
+
+      - name: Record the artifact hash
+        run: |
+          echo "### Release candidate" >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat dist/build-manifest.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-evidence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            artifacts/qa/
+          retention-days: 30
+
+      # Appendix A: the artifact never travels without its identity and
+      # evidence. A playable build that arrives alone cannot be audited.
+      - name: Assemble the release folder
+        if: success()
+        run: |
+          mkdir -p release/replays release/screens
+          cp -r dist/. release/
+          cp artifacts/qa/verify-summary.json release/ 2>/dev/null || true
+          cp tests/fixtures/replay.json release/replays/ 2>/dev/null || true
+          cp -r artifacts/qa/screens/. release/screens/ 2>/dev/null || true
+          cp docs/PLAYTEST_BRIEF.md release/playtest-brief.md
+          cp docs/LEGAL_AND_ASSET_LEDGER.md release/legal-and-asset-ledger.md
+          cp docs/RELEASE_NOTES.md release/release-notes.md
+
+      - name: Upload release candidate
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ten-count-${{ github.event.pull_request.head.sha || github.sha }}
+          path: release/
+          retention-days: 30
+
+  # The affected operator machine is Windows and has NODE_ENV=production set
+  # user-wide. This job reproduces both environmental conditions deliberately.
+  # It is a tooling regression gate, not a second release-artifact producer.
+  windows-tooling:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      NODE_ENV: production
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # Intentionally no command-line --include flag: this proves the committed
+      # .npmrc protects a plain operator `npm ci` from user-wide NODE_ENV.
+      - name: Install with NODE_ENV production
+        run: npm ci
+
+      - name: Test launcher and install contracts
+        run: npm test -- tests/tools/package-manager.test.ts tests/tools/install-contract.test.ts
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright browser
+        run: npx playwright install chromium
+
+      - name: Run browser smoke through Windows child processes
+        run: npm run qa:smoke
+
+      - name: Run screenshot capture through Windows child processes
+        run: npm run qa:screens
+
+      - name: Upload Windows tooling evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-tooling-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            artifacts/qa/smoke-report.json
+            artifacts/qa/screens-report.json
+            artifacts/qa/screens/
+          retention-days: 30

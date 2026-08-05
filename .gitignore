@@ -18,3 +18,7 @@ artifacts/private-repro/
 artifacts/qa/**/*.webm
 artifacts/qa/**/*.zip
 tsconfig.tsbuildinfo
+
+# Single-file playtest build (convenience copy, never a release artifact)
+dist-single/
+artifacts/playtest/

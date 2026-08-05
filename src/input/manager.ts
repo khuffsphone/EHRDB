@@ -28,6 +28,20 @@ function emptyRecord(): Record<Action, boolean> {
   return r;
 }
 
+/**
+ * The same snapshot with every edge already consumed.
+ *
+ * A frame is sampled once but may drive several simulation ticks when the
+ * renderer stalls and the fixed-step loop catches up. Level state (`held`)
+ * legitimately applies to all of those ticks; an edge does not — a single
+ * press must reach the simulation exactly once, or it is re-read inside the
+ * input buffer window and queues a punch nobody asked for. Callers running a
+ * catch-up loop feed the real snapshot to the first tick and this to the rest.
+ */
+export function levelOnly(s: InputSnapshot): InputSnapshot {
+  return { ...s, pressed: emptyRecord(), released: emptyRecord() };
+}
+
 export type BindingCapture = { device: 'keyboard' | 'gamepad'; token: string };
 
 export class InputManager {

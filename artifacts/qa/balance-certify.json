@@ -1,0 +1,242 @@
+{
+  "bouts": 1200,
+  "difficulty": "contender",
+  "outcomes": {
+    "ko": 499,
+    "tko": 16,
+    "decision": 632,
+    "draw": 53
+  },
+  "meanRounds": 4.8,
+  "meanTicks": 28070,
+  "meanLandPercent": 36.1,
+  "archetypes": [
+    {
+      "archetype": "boxer_puncher",
+      "bouts": 480,
+      "wins": 201,
+      "kos": 30,
+      "thrown": 184861,
+      "landed": 54931,
+      "headLanded": 49678,
+      "bodyLanded": 5253,
+      "knockdownsFor": 27,
+      "knockdownsAgainst": 166,
+      "punchMix": {
+        "jab": 77923,
+        "cross": 74570,
+        "lead_hook": 23758,
+        "rear_hook": 5800,
+        "lead_upper": 1222,
+        "rear_upper": 1588
+      }
+    },
+    {
+      "archetype": "brawler",
+      "bouts": 480,
+      "wins": 272,
+      "kos": 264,
+      "thrown": 88799,
+      "landed": 29901,
+      "headLanded": 29376,
+      "bodyLanded": 525,
+      "knockdownsFor": 278,
+      "knockdownsAgainst": 53,
+      "punchMix": {
+        "jab": 17597,
+        "cross": 22737,
+        "lead_hook": 20726,
+        "rear_hook": 23368,
+        "lead_upper": 45,
+        "rear_upper": 4326
+      }
+    },
+    {
+      "archetype": "counterpuncher",
+      "bouts": 480,
+      "wins": 209,
+      "kos": 40,
+      "thrown": 127495,
+      "landed": 50854,
+      "headLanded": 48458,
+      "bodyLanded": 2396,
+      "knockdownsFor": 40,
+      "knockdownsAgainst": 104,
+      "punchMix": {
+        "jab": 43274,
+        "cross": 58786,
+        "lead_hook": 13609,
+        "rear_hook": 7307,
+        "lead_upper": 2610,
+        "rear_upper": 1909
+      }
+    },
+    {
+      "archetype": "out_boxer",
+      "bouts": 480,
+      "wins": 225,
+      "kos": 10,
+      "thrown": 175445,
+      "landed": 57655,
+      "headLanded": 56219,
+      "bodyLanded": 1436,
+      "knockdownsFor": 1,
+      "knockdownsAgainst": 67,
+      "punchMix": {
+        "jab": 110614,
+        "cross": 45080,
+        "lead_hook": 16452,
+        "rear_hook": 3298,
+        "lead_upper": 0,
+        "rear_upper": 1
+      }
+    },
+    {
+      "archetype": "pressure",
+      "bouts": 480,
+      "wins": 240,
+      "kos": 171,
+      "thrown": 112767,
+      "landed": 39235,
+      "headLanded": 26678,
+      "bodyLanded": 12557,
+      "knockdownsFor": 190,
+      "knockdownsAgainst": 146,
+      "punchMix": {
+        "jab": 30179,
+        "cross": 13412,
+        "lead_hook": 44952,
+        "rear_hook": 8553,
+        "lead_upper": 14100,
+        "rear_upper": 1571
+      }
+    }
+  ],
+  "matchup": {
+    "out_boxer": {
+      "pressure": {
+        "w": 34,
+        "l": 20,
+        "d": 6
+      },
+      "counterpuncher": {
+        "w": 30,
+        "l": 24,
+        "d": 6
+      },
+      "brawler": {
+        "w": 26,
+        "l": 33,
+        "d": 1
+      },
+      "boxer_puncher": {
+        "w": 33,
+        "l": 23,
+        "d": 4
+      }
+    },
+    "pressure": {
+      "out_boxer": {
+        "w": 21,
+        "l": 30,
+        "d": 9
+      },
+      "counterpuncher": {
+        "w": 39,
+        "l": 20,
+        "d": 1
+      },
+      "brawler": {
+        "w": 17,
+        "l": 42,
+        "d": 1
+      },
+      "boxer_puncher": {
+        "w": 45,
+        "l": 15,
+        "d": 0
+      }
+    },
+    "counterpuncher": {
+      "out_boxer": {
+        "w": 34,
+        "l": 18,
+        "d": 8
+      },
+      "pressure": {
+        "w": 26,
+        "l": 34,
+        "d": 0
+      },
+      "brawler": {
+        "w": 30,
+        "l": 29,
+        "d": 1
+      },
+      "boxer_puncher": {
+        "w": 19,
+        "l": 35,
+        "d": 6
+      }
+    },
+    "brawler": {
+      "out_boxer": {
+        "w": 33,
+        "l": 25,
+        "d": 2
+      },
+      "pressure": {
+        "w": 38,
+        "l": 22,
+        "d": 0
+      },
+      "counterpuncher": {
+        "w": 24,
+        "l": 36,
+        "d": 0
+      },
+      "boxer_puncher": {
+        "w": 38,
+        "l": 22,
+        "d": 0
+      }
+    },
+    "boxer_puncher": {
+      "out_boxer": {
+        "w": 26,
+        "l": 29,
+        "d": 5
+      },
+      "pressure": {
+        "w": 17,
+        "l": 42,
+        "d": 1
+      },
+      "counterpuncher": {
+        "w": 38,
+        "l": 20,
+        "d": 2
+      },
+      "brawler": {
+        "w": 25,
+        "l": 35,
+        "d": 0
+      }
+    }
+  },
+  "failures": [],
+  "hashes": [
+    "63000:mirror_out_boxer:mirror_pressure:4de46f29906c058d",
+    "63001:mirror_out_boxer:mirror_counterpuncher:3a43a4c0bf1aab1b",
+    "63002:mirror_out_boxer:mirror_brawler:c6acbfb464d7c2bb",
+    "63003:mirror_out_boxer:mirror_boxer_puncher:a7151199cb37d3f1",
+    "63004:mirror_pressure:mirror_out_boxer:3f7bc0c008077f1a",
+    "63005:mirror_pressure:mirror_counterpuncher:b69b9e23fd284ff3",
+    "63006:mirror_pressure:mirror_brawler:cfb511b2be9dc6ea",
+    "63007:mirror_pressure:mirror_boxer_puncher:9aa177629256af46",
+    "63008:mirror_counterpuncher:mirror_out_boxer:67b5bfb4f7a9b8cd",
+    "63009:mirror_counterpuncher:mirror_pressure:6bc6fee32a323d25",
+    "63010:mirror_counterpuncher:mirror_brawler:88e5aa42ca5b558a",
+    "63011:mirror_counterpuncher:mirror_boxer_puncher:4ad6e24032bacfbd"
+  ]
+}

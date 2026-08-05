@@ -50,8 +50,8 @@ here was measured against *this* simulation.
 | Nineteen-item training catalogue and its effects | DESIGN_DECISION | Item count matches the report; every name and effect is original |
 | One-time career rebuild | DESIGN_DECISION | D-012 |
 | 90-second default round | DESIGN_DECISION | D-005 |
-| Archetype win rates 40–60% with ratings held equal | MEASURED | `npm run soak -- --mirror --bouts 200` |
-| ~35% clean-landing accuracy | MEASURED | Same |
+| Archetype win rates 40–60% with ratings held equal | MEASURED | `npm run balance:certify` — 1200 control bouts. The 200-bout run previously cited here has a ±11% interval per archetype and cannot support the claim |
+| ~35% clean-landing accuracy | MEASURED | `npm run soak -- --mirror --bouts 200` |
 | Outcome mix ~32% KO / ~3% TKO / ~57% decision / ~8% draw | MEASURED | Same |
 | Mean 5.2 of 6.3 scheduled rounds | MEASURED | Same |
 | Careers reach a title shot in 15/16 runs | MEASURED | `npm run career:sim -- --careers 16` |

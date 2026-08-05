@@ -65,17 +65,34 @@ describe('save parsing', () => {
   });
 
   it('migrates a version 1 save all the way forward without losing data', () => {
+    /*
+     * Built from a real career with the fields later versions added stripped
+     * back off, rather than from a hand-written stub. A stub carrying only
+     * `{ player: { displayName } }` was never a save this game could have
+     * written, and testing migration against one proves migration works on
+     * data that never existed while saying nothing about data that did.
+     */
+    const v1Career = (name: string, earnings: number): Record<string, unknown> => {
+      const c = JSON.parse(JSON.stringify(sampleCareer())) as Record<string, unknown>;
+      (c.player as Record<string, unknown>).displayName = name;
+      c.earnings = earnings;
+      c.wins = 7;
+      // v3 -> v4 added these; a v1 save does not have them.
+      for (const k of ['news', 'availableFunds', 'trainingLog', 'titleDefences', 'rebuildUsed']) delete c[k];
+      return c;
+    };
+
     const legacy = {
       magic: SAVE_MAGIC,
       version: 1,
       savedAt: NOW,
       settings: { audio: { master: 0.5, music: 0.3, sfx: 0.9 }, difficulty: 'legend' },
-      career: { player: { displayName: 'Old Timer' }, earnings: 123456, wins: 7 },
-      slots: { a: { player: { displayName: 'Slot One' }, earnings: 42 } },
+      career: v1Career('Old Timer', 123456),
+      slots: { a: v1Career('Slot One', 42) },
       legacy: [{ name: 'Ancestor', earnings: 1, wins: 1, losses: 0, draws: 0, kos: 0, peakRank: 3, titleDefences: 0, gradeKey: 'grade.contender', difficulty: 'club' }],
     };
     const result = parseSave(JSON.stringify(legacy));
-    expect(result.ok).toBe(true);
+    expect(result.ok, result.ok ? '' : result.reason).toBe(true);
     if (!result.ok) return;
 
     expect(result.migratedFrom).toBe(1);
@@ -204,6 +221,52 @@ describe('the save store', () => {
     store.reset(NOW);
     expect(store.data.career).toBeNull();
     expect(new SaveStore(storage).data.career).toBeNull();
+  });
+
+  it('does not leave the erased career sitting in the backup slot', () => {
+    /*
+     * The bug this pins: `reset` cleared the backup and then called `write`,
+     * and an ordinary write rolls the outgoing save into the backup. So the
+     * reset deleted the backup and immediately refilled it with the very
+     * career the player had just asked to destroy — and the corrupt-save
+     * recovery path would then restore it. "Erase everything" has to mean it.
+     */
+    const storage = new FakeStorage();
+    const store = new SaveStore(storage);
+    store.data.career = sampleCareer();
+    store.write(NOW);
+    store.data.career!.wins = 3;
+    store.write(NOW);
+
+    store.reset(NOW);
+
+    for (const [key, value] of storage.map) {
+      expect(value, `${key} still contains the erased career`).not.toContain('Round Trip');
+    }
+
+    // And a reader that has to fall back to the backup still finds nothing.
+    storage.setItem('tencount.save.v1', 'not json at all');
+    const reloaded = new SaveStore(storage);
+    expect(reloaded.data.career).toBeNull();
+  });
+
+  it('reports a structurally broken career as a load failure, not a later crash', () => {
+    const storage = new FakeStorage();
+    const store = new SaveStore(storage);
+    store.data.career = sampleCareer();
+    store.write(NOW);
+
+    // Corrupt one nested field the game will dereference on the career hub.
+    const raw = JSON.parse(storage.getItem('tencount.save.v1')!) as Record<string, unknown>;
+    (raw.career as Record<string, unknown>).ladder = 'not an array';
+    storage.setItem('tencount.save.v1', JSON.stringify(raw));
+    storage.map.delete('tencount.save.backup');
+
+    const reloaded = new SaveStore(storage);
+    expect(reloaded.data.career).toBeNull();
+    expect(reloaded.report.recovered).toBe(true);
+    // The original bytes survive so the player can export them.
+    expect(reloaded.data.quarantine?.raw).toContain('Round Trip');
   });
 
   it('survives storage that throws on write', () => {

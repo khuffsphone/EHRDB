@@ -14,8 +14,9 @@
  */
 import { execSync } from 'node:child_process';
 import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
-import { extname, join } from 'node:path';
+import { extname, join, sep } from 'node:path';
 import { createHash } from 'node:crypto';
+import { CONTAMINATION_RULES, scanForDerivedData } from './contamination-rules';
 
 interface Finding {
   severity: 'block' | 'warn';
@@ -52,6 +53,9 @@ const FORBIDDEN_TERMS: { label: string; pattern: RegExp }[] = [
   { label: 'acme interactive', pattern: /\bacme\s+interactive\b/i },
   { label: 'greatest heavyweights', pattern: /\bgreatest\s+heavyweights\b/i },
 ];
+
+/** The provenance record every tracked media file must appear in. */
+const LEDGER_PATH = 'docs/LEGAL_AND_ASSET_LEDGER.md';
 
 /** Paths that hold private research material and must never be imported. */
 const PRIVATE_PATHS = ['references/private-rom', 'artifacts/private-repro', 'references/drive'];
@@ -92,6 +96,114 @@ for (const file of tracked()) {
     }
   }
 }
+
+// --- 1b. Every tracked binary media file has a ledger row -------------------
+//
+// The header above has always claimed this check existed. It did not: the only
+// media check ran over `dist/`, and only as a warning. So the repository could
+// accumulate tracked images with no provenance entry while the audit reported
+// success — a guarantee stated more strongly than the thing enforcing it.
+//
+// This matters beyond tidiness. The research lane's palette scanner can render
+// actual historical colour values as PNG swatches. It writes them to
+// `artifacts/private-repro/`, which is git-ignored, and that is the correct
+// design — but a git-ignore is a convention and this is a gate. A palette dump
+// is explicitly forbidden under SAFE_RELEASE, so the repository, not just the
+// bundle, has to be checked.
+
+const MEDIA_EXTENSIONS = new Set([
+  '.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.tif', '.tiff',
+  '.mp3', '.ogg', '.wav', '.m4a', '.flac',
+  '.woff', '.woff2', '.ttf', '.otf',
+  '.mp4', '.webm', '.mov',
+]);
+
+if (existsSync(LEDGER_PATH)) {
+  const ledgerText = readFileSync(LEDGER_PATH, 'utf8');
+
+  /*
+   * Coverage is by declared prefix, not by substring.
+   *
+   * The obvious implementation — walk the file's ancestors and ask whether the
+   * ledger text mentions each one — is wrong, and wrong in the direction that
+   * makes the gate useless. A row naming `artifacts/qa/screens/` contains the
+   * substring `artifacts/qa/`, so an ancestor walk grants coverage to the whole
+   * of `artifacts/qa/`, and by the same argument to every ancestor up to the
+   * repository root. The first version of this check did exactly that and
+   * cheerfully passed a planted file. Caught by testing it rather than
+   * asserting it.
+   *
+   * So: take the paths the ledger actually declares — backticked tokens that
+   * look like repository paths — and require the file to sit under one of them.
+   */
+  const declared = [...ledgerText.matchAll(/`([A-Za-z0-9_./-]+)`/g)]
+    .map((m) => m[1])
+    .filter((p) => p.includes('/'));
+
+  const covered = (file: string): boolean =>
+    declared.some((d) => (d.endsWith('/') ? file.startsWith(d) : file === d));
+
+  const trackedMedia = tracked().filter((f) => MEDIA_EXTENSIONS.has(extname(f).toLowerCase()));
+  const unledgered = trackedMedia.filter((f) => !covered(f));
+  for (const file of unledgered.slice(0, 10)) {
+    findings.push({ severity: 'block', file, message: 'tracked binary media with no row in the asset ledger' });
+  }
+  if (unledgered.length > 10) {
+    findings.push({
+      severity: 'block',
+      file: LEDGER_PATH,
+      message: `${unledgered.length - 10} further tracked media file(s) with no ledger row`,
+    });
+  }
+  console.log(`  · tracked binary media: ${trackedMedia.length}, all with a ledger row: ${unledgered.length === 0}`);
+}
+
+// --- 1c. No ROM-derived data in tracked source -----------------------------
+//
+// The header of this file has claimed "ROM-derived data" since it was written.
+// Nothing enforced it. Section 1 detects a ROM by extension, by size-gated
+// hash, and section 2 detects the reference work by name — all three key on the
+// contamination arriving either as a file or as a word. A measured colour set
+// pasted into a `.ts` array is neither: it is a list of numbers, and numbers
+// have no extension, no size signature and no hash to match.
+//
+// That is the third time this audit has stated a guarantee more strongly than
+// the thing enforcing it. The rules live in `tools/contamination-rules.ts` with
+// their own controls, deliberately free of any dependency on the rest of this
+// repository so they can be ported if the canonical repository is not this one.
+//
+// Two severities, because the two kinds of hit mean different things:
+//
+//   - A *data shape* — a packed palette, vector addresses, a bare byte run —
+//     blocks anywhere in the repository. The ledger check already established
+//     that the repository, not just the bundle, is what has to be clean.
+//   - *Vocabulary* blocks on a release path only. Documentation is allowed to
+//     discuss the reference material; the game is not.
+
+const CONTAMINATION_EXEMPT = new Set([
+  // The rules themselves, and the controls that prove each one fires. The
+  // control samples are synthetic values authored here, not measured ones.
+  'tools/contamination-rules.ts',
+  'tests/legal/contamination.test.ts',
+]);
+
+for (const file of tracked()) {
+  if (!isText(file) || CONTAMINATION_EXEMPT.has(file)) continue;
+  if (!existsSync(file)) continue;
+  for (const hit of scanForDerivedData(readFileSync(file, 'utf8'))) {
+    const vocabularyOnly = hit.rule === 'hardware-vocabulary';
+    if (vocabularyOnly && !isRelease(file)) continue;
+    findings.push({
+      severity: 'block',
+      file,
+      message: `possible ROM-derived data: ${hit.label} (${hit.count})`,
+    });
+  }
+}
+
+console.log(`  · derived-data rules: ${CONTAMINATION_RULES.length}, tracked text files clean: ${
+  findings.every((f) => !f.message.startsWith('possible ROM-derived data'))
+}`);
 
 // --- 2. Release code carries no reference to the historical work ------------
 
@@ -157,13 +269,110 @@ if (existsSync(DIST)) {
     }
   }
   console.log(`  · bundle scanned: ${bundleFiles.length} files, ${mediaCount} binary media`);
+
+  // --- 4b. The bundle can say which source produced it ---------------------
+  //
+  // An artifact nobody can trace to a commit is an artifact nobody can audit.
+  // The manifest is written by the Vite build; see vite.config.ts.
+  const MANIFEST = join(DIST, 'build-manifest.json');
+  if (!existsSync(MANIFEST)) {
+    findings.push({ severity: 'block', file: MANIFEST, message: 'build manifest is missing — the artifact has no provenance' });
+  } else {
+    let manifest: Record<string, unknown> = {};
+    try {
+      manifest = JSON.parse(readFileSync(MANIFEST, 'utf8')) as Record<string, unknown>;
+    } catch {
+      findings.push({ severity: 'block', file: MANIFEST, message: 'build manifest is not readable JSON' });
+    }
+    for (const field of ['commit', 'lockfileHash', 'builtAt', 'version', 'ci', 'artifactHash'] as const) {
+      if (typeof manifest[field] !== 'string' || manifest[field] === '') {
+        findings.push({ severity: 'block', file: MANIFEST, message: `build manifest is missing "${field}"` });
+      }
+    }
+
+    // Recompute the artifact hash. A manifest that merely *claims* a digest
+    // proves nothing; the point of the field is that anyone can check it, so
+    // the audit checks it. Same construction as vite.config.ts.
+    const manifestFiles = Array.isArray(manifest.files) ? (manifest.files as string[]) : [];
+    const onDisk = bundleFiles
+      .map((f) => f.slice(DIST.length + 1).split(sep).join('/'))
+      .filter((f) => f !== 'build-manifest.json')
+      .sort();
+    if (manifestFiles.join('|') !== onDisk.join('|')) {
+      findings.push({
+        severity: 'block',
+        file: MANIFEST,
+        message: `manifest lists ${manifestFiles.length} file(s) but the bundle has ${onDisk.length}`,
+      });
+    } else {
+      const whole = createHash('sha256');
+      for (const rel of onDisk) {
+        whole.update(rel);
+        whole.update('\0');
+        whole.update(readFileSync(join(DIST, rel)));
+        whole.update('\0');
+      }
+      const recomputed = `sha256:${whole.digest('hex')}`;
+      if (manifest.artifactHash !== recomputed) {
+        findings.push({
+          severity: 'block',
+          file: MANIFEST,
+          message: `artifact hash does not match the bundle on disk (manifest ${String(manifest.artifactHash).slice(0, 23)}…, actual ${recomputed.slice(0, 23)}…)`,
+        });
+      }
+    }
+    // `unknown` is honest, but it is not shippable: it means the build could
+    // not determine what it was built from.
+    if (manifest.commit === 'unknown') {
+      findings.push({ severity: 'block', file: MANIFEST, message: 'build manifest has no commit — built outside a git checkout' });
+    }
+    if (manifest.lockfileHash === 'unknown') {
+      findings.push({ severity: 'block', file: MANIFEST, message: 'build manifest has no lockfile hash — the dependency set is unpinned' });
+    }
+    /*
+     * A release candidate must be clean and CI-built; a development build need
+     * not be. Both are reported either way — the only thing RELEASE=1 changes
+     * is whether they stop the run, so a developer is never blocked and a
+     * release can never quietly ship from someone's laptop.
+     */
+    const releaseMode = process.env.RELEASE === '1';
+    const severity: Finding['severity'] = releaseMode ? 'block' : 'warn';
+    if (manifest.dirty === true) {
+      findings.push({
+        severity,
+        file: MANIFEST,
+        message: `built from a dirty working tree (${String(manifest.dirtyScope ?? 'scope unrecorded')}) — not reproducible from the recorded commit`,
+      });
+    }
+    if (typeof manifest.dirtyScope !== 'string') {
+      // A dirty flag whose scope is unrecorded cannot be interpreted: nobody
+      // can tell whether "clean" means the source or merely some of it.
+      findings.push({ severity: 'block', file: MANIFEST, message: 'build manifest does not record what "dirty" was computed over' });
+    }
+    if (manifest.ci === 'local') {
+      findings.push({ severity, file: MANIFEST, message: 'built locally — a release artifact must come from CI' });
+    }
+    // The commit in the manifest must be the one compiled into the bundle,
+    // or the manifest is describing a different build than the one shipped.
+    const commit = String(manifest.commit ?? '');
+    const inBundle = bundleFiles
+      .filter((f) => extname(f).toLowerCase() === '.js')
+      .some((f) => readFileSync(f, 'utf8').includes(commit));
+    if (commit !== '' && commit !== 'unknown' && !inBundle) {
+      findings.push({ severity: 'block', file: MANIFEST, message: 'manifest commit does not appear in the bundle — mismatched artifacts' });
+    }
+    console.log(
+      `  · build identity: ${commit.slice(0, 8)} lockfile ${String(manifest.lockfileHash).slice(0, 8)} ` +
+        `ci ${String(manifest.ci)} artifact ${String(manifest.artifactHash ?? '').slice(7, 19)}`,
+    );
+  }
 } else {
   findings.push({ severity: 'warn', file: DIST, message: 'no build present — run `npm run build` before auditing a release' });
 }
 
 // --- 5. The ledger exists, names the profile, and is complete --------------
 
-const LEDGER = 'docs/LEGAL_AND_ASSET_LEDGER.md';
+const LEDGER = LEDGER_PATH;
 if (!existsSync(LEDGER)) {
   findings.push({ severity: 'block', file: LEDGER, message: 'asset ledger is missing' });
 } else {

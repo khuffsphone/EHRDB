@@ -47,14 +47,39 @@ Differentiated by goals, not stat multipliers.
 
 | Archetype | Range | Aggression | Guard | Punch mix | Counterplay |
 |---|---|---|---|---|---|
-| Out-boxer | 46 | 0.52 | 0.42 | Jab-dominant, long punches | Cut the ring, go to the body |
-| Pressure | 27 | 0.90 | 0.28 | Hooks and uppercuts, ~45% body | Pivot, clinch, intercepting uppercut |
-| Counterpuncher | 42 | 0.34 | 0.78 | Cross-heavy, punishes commitment | Feint, vary rhythm, body jab |
-| Brawler | 33 | 0.66 | 0.30 | Rear hand, power-leaning | Make him miss; he fades |
-| Boxer-puncher | 38 | 0.52 | 0.58 | Balanced | Force an uncomfortable pace |
+| Out-boxer | 46 | 0.55 | 0.42 | Jab-dominant, long punches | Cut the ring, go to the body |
+| Pressure | 29 | 0.90 | 0.30 | Hooks and uppercuts, ~35% body | Pivot, clinch, intercepting uppercut |
+| Counterpuncher | 42 | 0.38 | 0.78 | Cross-heavy, punishes commitment | Feint, vary rhythm, body jab |
+| Brawler | 35 | 0.56 | 0.22 | Rear hand, power-leaning, lowest volume | Make him miss; he fades |
+| Boxer-puncher | 39 | 0.58 | 0.72 | Balanced, leads with what reaches | Force an uncomfortable pace |
 
 Every archetype has a distinct preferred range and a distinct punch-weight
-vector — enforced by `tests/content/content.test.ts`.
+vector — enforced by `tests/content/content.test.ts` and
+`tests/ai/fairness.test.ts`.
+
+### What the balance pass changed, and what it must not
+
+Bringing every archetype inside the documented band moved four of these five
+numbers. Three of the moves fixed a design error rather than merely trading win
+rate:
+
+- **Pressure** targeted 27, one unit outside `RANGE.clinch`. The archetype
+  meant to throw the most punches threw the fewest, because it spent the round
+  tied up and its straight punches were gated out by range.
+- **Boxer-puncher** stood at 38, inside `RANGE.pocket`, with neither the
+  out-boxer's escape nor the brawler's power to justify being there. It took
+  the most punishment in the game and carried the worst accuracy, because most
+  of its weighted punches were short-reach ones thrown from too far out.
+- **Brawler** was dominant and won 94% of its bouts by stoppage.
+
+The brawler is the cautionary one. The first fix traded its rear-hand weight
+for the jab. That balanced it and was wrong: its power-punch share fell from
+31% to 10% and `tests/ai/fairness.test.ts` failed, correctly. Balance had been
+bought by deleting the archetype's identity, which is the same mistake as
+making every fighter identical and calling the result fair. The power mix is
+restored; the cost is paid in volume and distance instead. **An archetype's
+punch-weight vector is identity, not a balance knob** — `npm run balance:tune`
+is explicitly forbidden from redesigning one for the same reason.
 
 ## Pacing
 
