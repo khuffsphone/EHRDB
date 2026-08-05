@@ -1,0 +1,59 @@
+name: EHRDB Ring and Corner Lab v5 preflight
+
+on:
+  pull_request:
+    types: [opened]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out workflow branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Download private Ring and Corner source bundle
+        shell: bash
+        env:
+          BUNDLE_FILE_ID: 1FoGAojhrumwjccwoXbI8GVfFbbZAgOfK
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/source"
+          curl --fail --location --retry 4 --retry-all-errors \
+            "https://drive.usercontent.google.com/download?id=${BUNDLE_FILE_ID}&export=download&confirm=t" \
+            --output "$RUNNER_TEMP/source/ehrdb.bundle"
+          test "$(stat -c '%s' "$RUNNER_TEMP/source/ehrdb.bundle")" -gt 20000000
+          mkdir work
+          cd work
+          git init -q
+          git fetch -q "$RUNNER_TEMP/source/ehrdb.bundle" \
+            refs/heads/voice/ring-corner-v5:refs/remotes/bundle/ring-corner-v5
+          git switch -q -c voice/ring-corner-v5 refs/remotes/bundle/ring-corner-v5
+
+      - name: Validate without spending voice credits
+        working-directory: work
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_ENV
+          npm ci --include=dev
+          npm run typecheck
+          npm run lint
+          npm test
+          npm run build:single
+          node --check tools/assets/generate-ring-corner-v5.mjs
+          node --check tools/assets/verify-ring-corner-v5.mjs
+          bash -n tools/assets/remote-ring-corner-v5.sh
