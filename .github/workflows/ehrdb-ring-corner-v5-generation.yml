@@ -2,7 +2,7 @@ name: EHRDB Ring and Corner Lab v5 generation r2
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, synchronize]
     branches: [main]
 
 permissions:
@@ -93,27 +93,10 @@ jobs:
             https://api.elevenlabs.io/v1/user/subscription)"
           if [ "$status" != "200" ]; then
             echo "ElevenLabs authentication preflight failed with HTTP ${status}." >&2
-            python3 - <<'PY'
-import json, pathlib
-p=pathlib.Path('/home/runner/work/_temp/subscription.json')
-try:
-    data=json.loads(p.read_text())
-    detail=data.get('detail', data)
-    if isinstance(detail, dict):
-        print({k: detail.get(k) for k in ('type','code','message','status') if detail.get(k) is not None})
-    else:
-        print(str(detail)[:300])
-except Exception:
-    print('Authentication response was not readable JSON.')
-PY
+            node -e "const fs=require('fs'); try { const d=JSON.parse(fs.readFileSync(process.argv[1],'utf8')); const x=d.detail||d; console.log(JSON.stringify({type:x.type,code:x.code,message:x.message,status:x.status})); } catch { console.log('Authentication response was not readable JSON.'); }" "$RUNNER_TEMP/subscription.json"
             exit 5
           fi
-          python3 - <<'PY'
-import json, pathlib
-p=pathlib.Path('/home/runner/work/_temp/subscription.json')
-data=json.loads(p.read_text())
-print({'tier': data.get('tier'), 'status': data.get('status'), 'character_count': data.get('character_count'), 'character_limit': data.get('character_limit')})
-PY
+          node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync(process.argv[1],'utf8')); console.log(JSON.stringify({tier:d.tier,status:d.status,character_count:d.character_count,character_limit:d.character_limit}));" "$RUNNER_TEMP/subscription.json"
 
           mkdir -p "$RUNNER_TEMP/source"
           curl --fail --location --retry 4 --retry-all-errors \
