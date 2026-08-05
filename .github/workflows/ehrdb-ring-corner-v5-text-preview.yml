@@ -1,0 +1,122 @@
+name: EHRDB Ring and Corner Lab v5 text preview
+
+on:
+  pull_request:
+    types: [opened]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out packaging branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Download private Ring and Corner source bundle
+        shell: bash
+        env:
+          BUNDLE_FILE_ID: 1FoGAojhrumwjccwoXbI8GVfFbbZAgOfK
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/source"
+          curl --fail --location --retry 4 --retry-all-errors \
+            "https://drive.usercontent.google.com/download?id=${BUNDLE_FILE_ID}&export=download&confirm=t" \
+            --output "$RUNNER_TEMP/source/ehrdb.bundle"
+          test "$(stat -c '%s' "$RUNNER_TEMP/source/ehrdb.bundle")" -gt 20000000
+          mkdir work
+          cd work
+          git init -q
+          git fetch -q "$RUNNER_TEMP/source/ehrdb.bundle" \
+            refs/heads/voice/ring-corner-v5:refs/remotes/bundle/ring-corner-v5
+          git switch -q -c voice/ring-corner-v5 refs/remotes/bundle/ring-corner-v5
+
+      - name: Build and package text/caption preview
+        working-directory: work
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_ENV
+          npm ci --include=dev
+          npm run typecheck
+          npm run lint
+          npm test
+          npm run build:single
+
+          out="artifacts/EHRDB_RING_CORNER_LAB_v05_TEXT_PREVIEW"
+          mkdir -p "$out"
+          cp dist-single/heavyweight-circuit-v1.1.9.html "$out/game.html"
+
+          cat > "$out/server.mjs" <<'EOF'
+          import { createReadStream, existsSync, statSync } from 'node:fs';
+          import { createServer } from 'node:http';
+          import { extname, join, normalize } from 'node:path';
+          import { fileURLToPath } from 'node:url';
+          const root = fileURLToPath(new URL('.', import.meta.url));
+          const port = 8765;
+          const mime = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.txt':'text/plain; charset=utf-8'};
+          createServer((req,res)=>{
+            const raw = decodeURIComponent((req.url ?? '/').split('?')[0]);
+            const relative = raw === '/' ? 'index.html' : raw.replace(/^\/+/, '');
+            const path = normalize(join(root, relative));
+            if (!path.startsWith(root) || !existsSync(path) || !statSync(path).isFile()) { res.writeHead(404); res.end('Not found'); return; }
+            res.writeHead(200, {'Content-Type': mime[extname(path)] ?? 'application/octet-stream','Cache-Control':'no-store'});
+            createReadStream(path).pipe(res);
+          }).listen(port,'127.0.0.1',()=>console.log(`Ring & Corner Lab: http://127.0.0.1:${port}/`));
+          EOF
+
+          cat > "$out/index.html" <<'EOF'
+          <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ring & Corner Lab v5</title><style>body{font:16px system-ui;background:#15130f;color:#eee;max-width:900px;margin:50px auto;padding:24px}h1{font-size:32px}a{display:block;margin:14px 0;padding:16px;background:#29251e;color:#fff;text-decoration:none;border:1px solid #655b49;border-radius:8px}small{color:#bbb}</style></head><body><h1>Heavyweight Circuit — Ring & Corner Lab v5</h1><p>Text/caption preview. Bill and Vic are the only booth announcers. Referee and coach timing, selection, priorities, and advice are active. New referee and coach audio is not included because the available ElevenLabs credential was rejected before generation.</p><a href="game.html?booth=ring&coach=cal">Play with Coach Cal Brooks</a><a href="game.html?booth=ring&coach=amos">Play with Coach Amos Pike</a><a href="game.html?booth=ring&coach=vera">Play with Coach Vera Knox</a><p><small>You can also choose the coach in Settings. Referee calls preempt coach advice; coach advice preempts booth chatter.</small></p></body></html>
+          EOF
+
+          cat > "$out/START_RING_CORNER_TEXT_PREVIEW.cmd" <<'EOF'
+          @echo off
+          cd /d "%~dp0"
+          where node >nul 2>nul || (echo Node.js 20 or newer is required.& pause & exit /b 1)
+          start "" http://127.0.0.1:8765/
+          node server.mjs
+          pause
+          EOF
+
+          cat > "$out/README.txt" <<'EOF'
+          HEAVYWEIGHT CIRCUIT — RING & CORNER LAB v5 TEXT PREVIEW
+
+          1. Run START_RING_CORNER_TEXT_PREVIEW.cmd
+          2. Choose Cal, Amos, or Vera.
+          3. This preview demonstrates captions, role priority, coach selection, save migration, referee timing, and coach logic.
+
+          Implemented cast:
+          - Booth: Bill Kestrel and Vic Arden only.
+          - Referee: instructions, break calls, neutral-corner calls, counts, recovery checks, and stoppages.
+          - Cal Brooks: slow, warm, deliberate Black American veteran trainer; no exaggerated dialect or caricature.
+          - Amos Pike: weathered old seafarer/trainer; sparse nautical phrasing, not pirate comedy.
+          - Vera Knox: direct, clipped, aggressive coach.
+
+          New referee and coach audio generation remains blocked by the rejected ElevenLabs credential. No TTS credits were spent during the credential checks.
+          EOF
+
+          cd artifacts
+          zip -qr EHRDB_RING_CORNER_LAB_v05_TEXT_PREVIEW.zip EHRDB_RING_CORNER_LAB_v05_TEXT_PREVIEW
+          sha256sum EHRDB_RING_CORNER_LAB_v05_TEXT_PREVIEW.zip > EHRDB_RING_CORNER_LAB_v05_TEXT_PREVIEW.sha256
+
+      - name: Upload text/caption preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: EHRDB_RING_CORNER_LAB_v05_TEXT_PREVIEW-${{ github.run_id }}
+          path: |
+            work/artifacts/EHRDB_RING_CORNER_LAB_v05_TEXT_PREVIEW.zip
+            work/artifacts/EHRDB_RING_CORNER_LAB_v05_TEXT_PREVIEW.sha256
+          retention-days: 7
+          if-no-files-found: error
