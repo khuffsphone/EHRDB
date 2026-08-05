@@ -1,0 +1,61 @@
+name: EHRDB booth chemistry v4 preflight
+
+on:
+  pull_request:
+    types: [opened]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Check out workflow branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Download private source bundle
+        shell: bash
+        env:
+          BUNDLE_FILE_ID: 1AkOf0_z2IIm4PPheREo4ehvHEnxQ091T
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/source"
+          curl --fail --location --retry 4 --retry-all-errors \
+            "https://drive.usercontent.google.com/download?id=${BUNDLE_FILE_ID}&export=download&confirm=t" \
+            --output "$RUNNER_TEMP/source/ehrdb.bundle"
+          test "$(stat -c '%s' "$RUNNER_TEMP/source/ehrdb.bundle")" -gt 20000000
+
+          mkdir work
+          cd work
+          git init -q
+          git fetch -q "$RUNNER_TEMP/source/ehrdb.bundle" \
+            refs/heads/voice/booth-chemistry-v4:refs/remotes/bundle/booth-chemistry-v4
+          git switch -q -c voice/booth-chemistry-v4 refs/remotes/bundle/booth-chemistry-v4
+
+      - name: Validate without spending voice credits
+        working-directory: work
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_ENV
+          npm ci --include=dev
+          npm run typecheck
+          npm run lint
+          npm test
+          npm run build:single
+          node --check tools/assets/generate-booth-chemistry-v4.mjs
+          node --check tools/assets/verify-booth-chemistry-v4.mjs
+          bash -n tools/assets/remote-booth-chemistry-v4.sh
