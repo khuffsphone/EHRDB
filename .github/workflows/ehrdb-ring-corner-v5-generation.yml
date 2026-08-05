@@ -1,0 +1,142 @@
+name: EHRDB Ring and Corner Lab v5 generation r2
+
+on:
+  pull_request:
+    types: [opened]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ehrdb-ring-corner-v5-r2-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out exchange branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install media tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: Create ephemeral RSA keypair
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out "$RUNNER_TEMP/voice-private.pem" 2>/dev/null
+          openssl pkey -in "$RUNNER_TEMP/voice-private.pem" -pubout -out "$RUNNER_TEMP/voice-public.pem"
+
+      - name: Publish public key for one-time exchange
+        uses: actions/upload-artifact@v4
+        with:
+          name: ring-corner-public-key-${{ github.run_id }}
+          path: ${{ runner.temp }}/voice-public.pem
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Authenticate, generate, and verify Ring and Corner Lab v5
+        shell: bash
+        env:
+          HEAD_BRANCH: ${{ github.head_ref }}
+          BUNDLE_FILE_ID: 1FoGAojhrumwjccwoXbI8GVfFbbZAgOfK
+        run: |
+          set -euo pipefail
+          cleanup() {
+            rm -f "$RUNNER_TEMP/voice-private.pem" "$RUNNER_TEMP/voice-key.enc" "$RUNNER_TEMP/voice-key.txt" "$RUNNER_TEMP/key.enc.b64" "$RUNNER_TEMP/subscription.json"
+          }
+          trap cleanup EXIT
+
+          key_path="voice-exchange/key-${GITHUB_RUN_ID}.enc.b64"
+          found=0
+          for attempt in $(seq 1 120); do
+            git fetch --quiet origin "${HEAD_BRANCH}" --depth=1
+            if git show "FETCH_HEAD:${key_path}" > "$RUNNER_TEMP/key.enc.b64" 2>/dev/null; then
+              found=1
+              break
+            fi
+            sleep 10
+          done
+          if [ "$found" -ne 1 ]; then
+            echo "Encrypted key did not arrive at ${key_path} within 20 minutes." >&2
+            exit 4
+          fi
+
+          base64 --decode "$RUNNER_TEMP/key.enc.b64" > "$RUNNER_TEMP/voice-key.enc"
+          openssl pkeyutl -decrypt \
+            -inkey "$RUNNER_TEMP/voice-private.pem" \
+            -in "$RUNNER_TEMP/voice-key.enc" \
+            -out "$RUNNER_TEMP/voice-key.txt" \
+            -pkeyopt rsa_padding_mode:oaep \
+            -pkeyopt rsa_oaep_md:sha256
+          ELEVENLABS_API_KEY="$(tr -d '\r\n' < "$RUNNER_TEMP/voice-key.txt")"
+          test ${#ELEVENLABS_API_KEY} -ge 20
+          echo "::add-mask::${ELEVENLABS_API_KEY}"
+
+          status="$(curl --silent --show-error --output "$RUNNER_TEMP/subscription.json" --write-out '%{http_code}' \
+            --header "xi-api-key: ${ELEVENLABS_API_KEY}" \
+            https://api.elevenlabs.io/v1/user/subscription)"
+          if [ "$status" != "200" ]; then
+            echo "ElevenLabs authentication preflight failed with HTTP ${status}." >&2
+            python3 - <<'PY'
+import json, pathlib
+p=pathlib.Path('/home/runner/work/_temp/subscription.json')
+try:
+    data=json.loads(p.read_text())
+    detail=data.get('detail', data)
+    if isinstance(detail, dict):
+        print({k: detail.get(k) for k in ('type','code','message','status') if detail.get(k) is not None})
+    else:
+        print(str(detail)[:300])
+except Exception:
+    print('Authentication response was not readable JSON.')
+PY
+            exit 5
+          fi
+          python3 - <<'PY'
+import json, pathlib
+p=pathlib.Path('/home/runner/work/_temp/subscription.json')
+data=json.loads(p.read_text())
+print({'tier': data.get('tier'), 'status': data.get('status'), 'character_count': data.get('character_count'), 'character_limit': data.get('character_limit')})
+PY
+
+          mkdir -p "$RUNNER_TEMP/source"
+          curl --fail --location --retry 4 --retry-all-errors \
+            "https://drive.usercontent.google.com/download?id=${BUNDLE_FILE_ID}&export=download&confirm=t" \
+            --output "$RUNNER_TEMP/source/ehrdb.bundle"
+          test "$(stat -c '%s' "$RUNNER_TEMP/source/ehrdb.bundle")" -gt 20000000
+
+          mkdir work
+          cd work
+          git init -q
+          git fetch -q "$RUNNER_TEMP/source/ehrdb.bundle" \
+            refs/heads/voice/ring-corner-v5:refs/remotes/bundle/ring-corner-v5
+          git switch -q -c voice/ring-corner-v5 refs/remotes/bundle/ring-corner-v5
+
+          ELEVENLABS_API_KEY="$ELEVENLABS_API_KEY" bash tools/assets/remote-ring-corner-v5.sh
+
+      - name: Upload playable Ring and Corner Lab v5
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: EHRDB_HEAVYWEIGHT_CIRCUIT_RING_CORNER_LAB_122_v05-${{ github.run_id }}
+          path: |
+            work/artifacts/EHRDB_HEAVYWEIGHT_CIRCUIT_RING_CORNER_LAB_122_v05.zip
+            work/artifacts/ring-corner-v5/
+          retention-days: 7
+          if-no-files-found: error
