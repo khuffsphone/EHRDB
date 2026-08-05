@@ -1,0 +1,180 @@
+name: EHRDB voice hype audition package r2
+
+on:
+  pull_request:
+    types: [opened]
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+
+    steps:
+      - name: Check out packaging branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: Download generated 100-clip artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ehrdb-voice-hype-audition-100-31024209981
+          path: generated-audio
+          github-token: ${{ github.token }}
+          repository: khuffsphone/EHRDB
+          run-id: 31024209981
+
+      - name: Build, validate, and browser-test voiced game
+        shell: bash
+        env:
+          BUNDLE_FILE_ID: 1LM-jw6ScDIiaUPlo4LlFvhFtoK-tSXMw
+        run: |
+          set -euo pipefail
+
+          mkdir -p "$RUNNER_TEMP/source"
+          curl --fail --location --retry 4 --retry-all-errors \
+            "https://drive.usercontent.google.com/download?id=${BUNDLE_FILE_ID}&export=download&confirm=t" \
+            --output "$RUNNER_TEMP/source/ehrdb.bundle"
+          test "$(stat -c '%s' "$RUNNER_TEMP/source/ehrdb.bundle")" -gt 20000000
+
+          mkdir work
+          cd work
+          git init -q
+          git fetch -q "$RUNNER_TEMP/source/ehrdb.bundle" \
+            refs/heads/voice/hype-audition-v2:refs/remotes/bundle/voice-hype-audition
+          git switch -q -c voice/hype-audition-v2 refs/remotes/bundle/voice-hype-audition
+          sed -i "/import type { BoothSpeaker } from '..\\/..\\/src\\/content\\/booth.data.ts';/d" tools/assets/build-voice-sample.ts
+
+          unset NODE_ENV
+          npm ci --include=dev
+
+          mkdir -p artifacts/voice-hype-audition
+          voice_dir="$(find "$GITHUB_WORKSPACE/generated-audio" -type d -path '*/voice-hype-audition/voice' | head -1)"
+          jobs_file="$(find "$GITHUB_WORKSPACE/generated-audio" -type f -path '*/voice-hype-audition/voice-sample-jobs.json' | head -1)"
+          test -n "$voice_dir"
+          test -n "$jobs_file"
+          cp -a "$voice_dir" artifacts/voice-hype-audition/voice
+          cp "$jobs_file" artifacts/voice-hype-audition/voice-sample-jobs.json
+
+          npm run typecheck
+          npm run lint
+          npm test
+          npm run build:single
+          cp dist-single/heavyweight-circuit-v1.1.9.html artifacts/voice-hype-audition/game.html
+
+          python3 - <<'PY'
+          import hashlib, json, pathlib, subprocess
+          root = pathlib.Path('artifacts/voice-hype-audition')
+          voice = root / 'voice'
+          manifest = json.loads((voice / 'manifest.json').read_text())
+          provenance = json.loads((voice / 'PROVENANCE.json').read_text())
+          jobs_doc = json.loads((root / 'voice-sample-jobs.json').read_text())
+          clips = sorted(voice.glob('*.mp3'))
+          prov_by_id = {row['clipId']: row for row in provenance}
+          speaker_counts = {}
+          for job in jobs_doc['jobs']:
+              speaker_counts[job['speaker']] = speaker_counts.get(job['speaker'], 0) + 1
+          errors = []
+          durations = {}
+          rates = {}
+          channels = {}
+          for path in clips:
+              row = prov_by_id.get(path.stem)
+              if row is None:
+                  errors.append({'file': path.name, 'error': 'missing provenance'})
+              else:
+                  actual_hash = hashlib.sha256(path.read_bytes()).hexdigest()
+                  if row.get('sha256') != actual_hash:
+                      errors.append({'file': path.name, 'error': 'sha256 mismatch'})
+                  if row.get('bytes') != path.stat().st_size:
+                      errors.append({'file': path.name, 'error': 'byte-count mismatch'})
+              probe = subprocess.run(
+                  ['ffprobe', '-v', 'error', '-show_entries', 'format=duration:stream=sample_rate,channels', '-of', 'json', str(path)],
+                  capture_output=True,
+                  text=True,
+              )
+              if probe.returncode:
+                  errors.append({'file': path.name, 'error': probe.stderr.strip()})
+                  continue
+              info = json.loads(probe.stdout)
+              stream = (info.get('streams') or [{}])[0]
+              durations[path.name] = round(float(info['format']['duration']), 3)
+              rates[path.name] = int(stream.get('sample_rate') or 0)
+              channels[path.name] = int(stream.get('channels') or 0)
+          report = {
+              'profile': 'hype-audition-v2',
+              'generatedClips': len(clips),
+              'manifestClips': len(manifest.get('clips', {})),
+              'provenanceRows': len(provenance),
+              'jobRows': len(jobs_doc.get('jobs', [])),
+              'speakerCounts': speaker_counts,
+              'decodeOrIntegrityErrors': errors,
+              'totalDurationSeconds': round(sum(durations.values()), 3),
+              'durationSeconds': durations,
+              'sampleRates': rates,
+              'channels': channels,
+              'gameSha256': hashlib.sha256((root / 'game.html').read_bytes()).hexdigest(),
+          }
+          (root / 'VOICE_GENERATION_REPORT.json').write_text(json.dumps(report, indent=2) + '\n')
+          if len(clips) != 100 or len(manifest.get('clips', {})) != 100 or len(provenance) != 100 or len(jobs_doc.get('jobs', [])) != 100:
+              raise SystemExit('count validation failed')
+          if speaker_counts != {'BILL': 25, 'MARCY': 25, 'HANK': 25, 'VIC': 25}:
+              raise SystemExit(f'speaker count validation failed: {speaker_counts}')
+          if errors:
+              raise SystemExit('audio integrity validation failed')
+          if set(rates.values()) != {44100} or set(channels.values()) != {1}:
+              raise SystemExit('audio format validation failed')
+          PY
+
+          npx playwright install --with-deps chromium
+          node tools/static-server.mjs artifacts/voice-hype-audition 8099 > "$RUNNER_TEMP/voice-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          sleep 2
+          node tools/assets/verify-voice-pack.mjs \
+            --url=http://127.0.0.1:8099/game.html \
+            --wait=30000 | tee artifacts/voice-hype-audition/BROWSER_VOICE_VERIFY.txt
+          kill "$server_pid" 2>/dev/null || true
+          trap - EXIT
+
+          cat > artifacts/voice-hype-audition/README.txt <<'TXT'
+          HEAVYWEIGHT CIRCUIT — HYPE AUDITION v2
+
+          100 generated voice clips: 25 each for Bill Kestrel, Marcy Vance,
+          Hank Vale and Vic Arden. Duke Halloran and Ray Nunziato are not in this
+          audition. This review pack contains occasional mature language.
+
+          Open game.html through a local HTTP server, not file://. Enable Voice
+          in Settings. This is an audition pack, not final release-cast approval.
+          TXT
+
+          cd artifacts
+          zip -qr EHRDB_HEAVYWEIGHT_CIRCUIT_VOICE_HYPE_AUDITION_100_v02.zip voice-hype-audition
+
+      - name: Upload verified playable package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: EHRDB_HEAVYWEIGHT_CIRCUIT_VOICE_HYPE_AUDITION_100_v02-r2-${{ github.run_id }}
+          path: |
+            work/artifacts/EHRDB_HEAVYWEIGHT_CIRCUIT_VOICE_HYPE_AUDITION_100_v02.zip
+            work/artifacts/voice-hype-audition/
+          retention-days: 7
+          if-no-files-found: error
