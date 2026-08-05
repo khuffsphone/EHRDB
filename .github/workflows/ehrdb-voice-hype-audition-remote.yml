@@ -1,0 +1,161 @@
+name: EHRDB voice hype audition remote generation
+
+on:
+  pull_request:
+    types: [opened]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ehrdb-voice-hype-audition-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+
+    steps:
+      - name: Check out exchange branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install media tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: Create ephemeral RSA keypair
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out "$RUNNER_TEMP/voice-private.pem" 2>/dev/null
+          openssl pkey -in "$RUNNER_TEMP/voice-private.pem" -pubout -out "$RUNNER_TEMP/voice-public.pem"
+
+      - name: Publish public key for one-time key exchange
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice-hype-public-key-${{ github.run_id }}
+          path: ${{ runner.temp }}/voice-public.pem
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Wait for encrypted ElevenLabs key and generate pack
+        shell: bash
+        env:
+          HEAD_BRANCH: ${{ github.head_ref }}
+          BUNDLE_FILE_ID: 1LM-jw6ScDIiaUPlo4LlFvhFtoK-tSXMw
+        run: |
+          set -euo pipefail
+          cleanup() {
+            rm -f "$RUNNER_TEMP/voice-private.pem" "$RUNNER_TEMP/voice-key.enc" "$RUNNER_TEMP/voice-key.txt" "$RUNNER_TEMP/key.enc.b64"
+          }
+          trap cleanup EXIT
+
+          found=0
+          for attempt in $(seq 1 120); do
+            git fetch --quiet origin "${HEAD_BRANCH}" --depth=1
+            if git show FETCH_HEAD:voice-exchange/key.enc.b64 > "$RUNNER_TEMP/key.enc.b64" 2>/dev/null; then
+              found=1
+              break
+            fi
+            sleep 10
+          done
+          if [ "$found" -ne 1 ]; then
+            echo "Encrypted key did not arrive within 20 minutes." >&2
+            exit 4
+          fi
+
+          base64 --decode "$RUNNER_TEMP/key.enc.b64" > "$RUNNER_TEMP/voice-key.enc"
+          openssl pkeyutl -decrypt \
+            -inkey "$RUNNER_TEMP/voice-private.pem" \
+            -in "$RUNNER_TEMP/voice-key.enc" \
+            -out "$RUNNER_TEMP/voice-key.txt" \
+            -pkeyopt rsa_padding_mode:oaep \
+            -pkeyopt rsa_oaep_md:sha256
+          ELEVENLABS_API_KEY="$(tr -d '\r\n' < "$RUNNER_TEMP/voice-key.txt")"
+          test ${#ELEVENLABS_API_KEY} -ge 20
+          echo "::add-mask::${ELEVENLABS_API_KEY}"
+
+          mkdir -p "$RUNNER_TEMP/source"
+          curl --fail --location --retry 4 --retry-all-errors \
+            "https://drive.usercontent.google.com/download?id=${BUNDLE_FILE_ID}&export=download&confirm=t" \
+            --output "$RUNNER_TEMP/source/ehrdb.bundle"
+          test "$(stat -c '%s' "$RUNNER_TEMP/source/ehrdb.bundle")" -gt 20000000
+
+          mkdir work
+          cd work
+          git init -q
+          git fetch -q "$RUNNER_TEMP/source/ehrdb.bundle" \
+            refs/heads/voice/hype-audition-v2:refs/remotes/bundle/voice-hype-audition
+          git switch -q -c voice/hype-audition-v2 refs/remotes/bundle/voice-hype-audition
+
+          unset NODE_ENV
+          npm ci --include=dev
+          mkdir -p artifacts/voice-hype-audition
+          ./node_modules/.bin/tsx tools/assets/build-voice-sample.ts > artifacts/voice-hype-audition/voice-sample-jobs.json
+
+          ELEVENLABS_API_KEY="$ELEVENLABS_API_KEY" node tools/assets/gen-audio-pack.mjs \
+            artifacts/voice-hype-audition/voice-sample-jobs.json \
+            --out artifacts/voice-hype-audition \
+            --output-format mp3_44100_128
+
+          test "$(find artifacts/voice-hype-audition/voice -maxdepth 1 -name '*.mp3' | wc -l | tr -d ' ')" = 100
+          test "$(node -e "const x=require('./artifacts/voice-hype-audition/voice/manifest.json'); console.log(Object.keys(x.clips).length)")" = 100
+          test "$(node -e "const x=require('./artifacts/voice-hype-audition/voice/PROVENANCE.json'); console.log(x.length)")" = 100
+
+          npm run typecheck
+          npm run lint
+          npm test
+          npm run build:single
+          cp dist-single/heavyweight-circuit-v1.1.9.html artifacts/voice-hype-audition/game.html
+
+          python3 - <<'PY'
+          import json, pathlib, subprocess, hashlib
+          root=pathlib.Path('artifacts/voice-hype-audition')
+          clips=sorted((root/'voice').glob('*.mp3'))
+          errors=[]; durations={}; rates={}; channels={}
+          for p in clips:
+              r=subprocess.run(['ffprobe','-v','error','-show_entries','format=duration:stream=sample_rate,channels','-of','json',str(p)],capture_output=True,text=True)
+              if r.returncode:
+                  errors.append({'file':p.name,'error':r.stderr.strip()}); continue
+              x=json.loads(r.stdout); stream=(x.get('streams') or [{}])[0]
+              durations[p.name]=round(float(x['format']['duration']),3)
+              rates[p.name]=int(stream.get('sample_rate') or 0)
+              channels[p.name]=int(stream.get('channels') or 0)
+          report={'profile':'hype-audition-v2','generatedClips':len(clips),'decodeErrors':errors,'durationSeconds':durations,'sampleRates':rates,'channels':channels,'gameSha256':hashlib.sha256((root/'game.html').read_bytes()).hexdigest()}
+          (root/'VOICE_GENERATION_REPORT.json').write_text(json.dumps(report,indent=2)+'\n')
+          if len(clips)!=100 or errors or set(rates.values())!={44100} or set(channels.values())!={1}: raise SystemExit('audio validation failed')
+          PY
+
+          cat > artifacts/voice-hype-audition/README.txt <<'TXT'
+          HEAVYWEIGHT CIRCUIT — HYPE AUDITION v2
+          100 generated clips: 25 each for Bill Kestrel, Marcy Vance, Hank Vale and Vic Arden.
+          This review pack contains occasional mature language. Enable Voice in Settings.
+          Serve this folder over HTTP; do not open game.html with file://.
+          TXT
+
+          cd artifacts
+          zip -qr ehrdb-voice-hype-audition-100.zip voice-hype-audition
+
+      - name: Upload playable voice hype audition
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ehrdb-voice-hype-audition-100-${{ github.run_id }}
+          path: |
+            work/artifacts/ehrdb-voice-hype-audition-100.zip
+            work/artifacts/voice-hype-audition/
+          retention-days: 7
+          if-no-files-found: error
